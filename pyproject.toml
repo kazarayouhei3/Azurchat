@@ -1,0 +1,5 @@
+[project]
+name = "PySide Widgets Project"
+
+[tool.pyside6-project]
+files = ["chat_item.py", "chat_page.py", "form.ui", "form2.py", "form_chat.ui", "form_info.ui", "pic.qrc", "widget.py"]
