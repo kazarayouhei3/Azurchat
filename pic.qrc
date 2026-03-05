@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>caidan.png</file>
+        <file>head.png</file>
+        <file>send.png</file>
+        <file>set.png</file>
+        <file>azur.ico</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>icon/del.png</file>
+        <file>icon/mem.png</file>
+        <file>icon/top.png</file>
+        <file>icon/talk.svg</file>
+        <file>icon/talk_select.svg</file>
+        <file>icon/phone.svg</file>
+        <file>icon/phone_select.svg</file>
+        <file>icon/my.svg</file>
+        <file>icon/my_select.svg</file>
+        <file>icon/quit.svg</file>
+    </qresource>
+</RCC>
