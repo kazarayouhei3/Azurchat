@@ -19,6 +19,7 @@ from chara import Chara
 from login import Login
 from reg import Reg
 from fr import Fr
+from api_dialog import Dialog
 
 class Widget(QWidget):
     def __init__(self, parent=None):

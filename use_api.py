@@ -13,7 +13,7 @@ def resource_path(*paths):
     return os.path.join(get_base_path(), *paths)
 
 class Chat():
-    def __init__(self, role = "hipper"):
+    def __init__(self, role="hipper",model="deepseek-chat",api_key="",base_url="https://api.deepseek.com"):
         self.role = role
         persona_file = resource_path(f"{self.role}.txt")
         self.persona_text = self.load_persona_from_txt(persona_file)
@@ -26,9 +26,9 @@ class Chat():
             {"role": "system", "content": self.SYSTEM_PROMPT}
         ]
         self.client = OpenAI(
-                api_key="sk-62ee776af9b7421eab6ce4a8df26e731",
-                base_url="https://api.deepseek.com"
-            )
+                    api_key=api_key,
+                    base_url=base_url
+        )
 
     def load_persona_from_txt(self, path):
         with open(path, "r", encoding="utf-8") as f:
@@ -42,9 +42,9 @@ class Chat():
                "content": user_text
            })
 
-           # 2️⃣ 请求 DeepSeek
+           # 2️⃣ 请求
            response = self.client.chat.completions.create(
-               model="deepseek-chat",
+               model=self.model,
                messages=self.messages
            )
 
