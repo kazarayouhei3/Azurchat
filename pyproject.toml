@@ -1,5 +1,0 @@
-[project]
-name = "PySide Widgets Project"
-
-[tool.pyside6-project]
-files = ["Logo.png", "chara.py", "chat.py", "chat_info.py", "chat_item.py", "chat_page.py", "form.ui", "form_chara.ui", "form_chat.ui", "form_info.ui", "fr.py", "fr.ui", "go.qrc", "hipper.txt", "login.py", "login.ui", "pic.qrc", "reg.py", "reg.ui", "use_api.py", "widget.py"]

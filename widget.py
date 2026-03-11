@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QSize, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 
 from ui_form import Ui_Widget
-from form2 import InfoWindow
+
 from chat_item import ChatItem
 from chat_page import ChatPage
 from PySide6.QtCore import Qt, QEvent
@@ -35,16 +35,18 @@ class Widget(QWidget):
         self.page_list = QWidget()
         self.page_list.setLayout(old_layout)
 
-        self.page_chat = ChatPage()
         self.info = ChatCommand()
+
         self.login = Login()
+        # self.page_chat = ChatPage()
+        self.page_chat = None
+
         self.reg = Reg()
         self.fr = Fr()
 
         self.stack = QStackedLayout(self)
         self.stack.setContentsMargins(0, 0, 0, 0)
         self.stack.addWidget(self.page_list)  # index 0
-        self.stack.addWidget(self.page_chat)  # index 1
 
 
         self.setLayout(self.stack)
@@ -60,13 +62,14 @@ class Widget(QWidget):
 
         self.ui.quit_button.clicked.connect(self.close)
 
-        self.login.signal.connect(
-            lambda: self.stack.setCurrentWidget(self.page_list)
-        )
+        # self.login.signal.connect(
+        #     lambda: self.stack.setCurrentWidget(self.page_list)
+        # )
 
-        self.page_chara.back_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.page_chat)
-        )
+        # self.page_chara.back_signal.connect(
+        #     lambda: self.stack.setCurrentWidget(self.page_chat)
+        # )
+        self.login.signal.connect(self.after_login)
 
         self.login.reg_signal.connect(
             lambda: self.stack.setCurrentWidget(self.reg)
@@ -81,7 +84,7 @@ class Widget(QWidget):
         )
 
         # ⭐ 绑定返回按钮（通过 ChatPage 提供的方法）
-        self.page_chat.bind_back(lambda: self.stack.setCurrentWidget(self.page_list))
+        # self.page_chat.bind_back(lambda: self.stack.setCurrentWidget(self.page_list))
 
 
         # 点击会话进入聊天页
@@ -99,9 +102,6 @@ class Widget(QWidget):
 
         self.drag_bar = self.ui.AzurChat
 
-        self.page_chat.bind_open_chara(
-            lambda: self.stack.setCurrentIndex(2)
-        )
 
         self.init_nav_button(
             self.ui.chat,
@@ -149,6 +149,7 @@ class Widget(QWidget):
             lambda: self.stack.setCurrentWidget(self.fr)
         )
 
+
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal
         btn._icon_active = icon_active
@@ -183,10 +184,14 @@ class Widget(QWidget):
             self._drag_pos = event.globalPosition().toPoint()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
+        if self._drag_pos and (event.buttons() & Qt.LeftButton):
             delta = event.globalPosition().toPoint() - self._drag_pos
-            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.move(self.pos() + delta)
+
             self._drag_pos = event.globalPosition().toPoint()
+
+    def mouseReleaseEvent(self, event):
+        self._drag_pos = None
 
     def start_intro_anim(self):
         self._play_index = 0
@@ -235,6 +240,22 @@ class Widget(QWidget):
         self._anims.extend([anim1, anim2])
         anim1.start()
 
+    def after_login(self):
+
+        if not self.page_chat:
+            self.page_chat = ChatPage()
+
+            self.stack.addWidget(self.page_chat)
+
+            self.page_chat.bind_back(
+                lambda: self.stack.setCurrentWidget(self.page_list)
+            )
+
+            self.page_chat.bind_open_chara(
+                lambda: self.stack.setCurrentWidget(self.page_chara)
+            )
+
+        self.stack.setCurrentWidget(self.page_list)
     # ===== 切换聊天页 =====
     def open_chat_in_place(self, item: QListWidgetItem):
         w = self.ui.list.itemWidget(item)
@@ -244,7 +265,7 @@ class Widget(QWidget):
         self.page_chat.set_title(title)
 
         # 切换页面
-        self.stack.setCurrentIndex(1)
+        self.stack.setCurrentWidget(self.page_chat)
 
     def bind_open_info(self, callback):
         tool_button = self.root.findChild(QToolButton, "menu")

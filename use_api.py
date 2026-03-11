@@ -1,7 +1,8 @@
 import os
 import sys
 from openai import OpenAI
-
+import sqlite3
+import json
 def get_base_path():
     # 打包后
     if getattr(sys, 'frozen', False):
@@ -13,27 +14,64 @@ def resource_path(*paths):
     return os.path.join(get_base_path(), *paths)
 
 class Chat():
-    def __init__(self, role="hipper",model="deepseek-chat",api_key="",base_url="https://api.deepseek.com"):
+
+    def __init__(self, role="hipper"):
+
         self.role = role
+
+        self.username, self.model = self.load_username()
+        print(self.username, self.model)
+        api_key, base_url = self.load_api_from_db(self.username)
+
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=base_url
+        )
+
         persona_file = resource_path(f"{self.role}.txt")
         self.persona_text = self.load_persona_from_txt(persona_file)
+
         self.SYSTEM_PROMPT = f"""
             你必须始终扮演以下角色设定，不允许偏离。
             {self.persona_text}
             请保持角色语气，不要解释你是AI。
             """
+
         self.messages = [
             {"role": "system", "content": self.SYSTEM_PROMPT}
         ]
-        self.client = OpenAI(
-                    api_key=api_key,
-                    base_url=base_url
-        )
+
+    def load_username(self):
+
+        try:
+            with open("config.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get("username"), data.get("model")
+        except:
+            return None
 
     def load_persona_from_txt(self, path):
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
+    def load_api_from_db(self, username):
+
+        conn = sqlite3.connect("chat.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT api, url FROM users WHERE username=?",
+            (username,)
+        )
+
+        result = cursor.fetchone()
+
+        conn.close()
+
+        if result:
+            return result[0], result[1]
+        else:
+            return None, None
 
     def chat(self, user_text):
            # 1️⃣ 加入用户输入
@@ -59,29 +97,3 @@ class Chat():
            # 4️⃣ 返回给 UI
            return reply
 
-    # ========= 生成开场白 =========
-    def generate_opening(self):
-        response = self.client.chat.completions.create(
-            model="deepseek-chat",
-            messages=self.messages + [
-                {
-                    "role": "user",
-                    "content": "现在开始对话，请用角色语气主动说第一句话。"
-                }
-            ]
-        )
-
-        opening = response.choices[0].message.content
-
-        self.messages.append({
-            "role": "assistant",
-            "content": opening
-        })
-
-        return opening
-
-    # ========= 重置对话 =========
-    def reset(self):
-        self.messages = [
-            {"role": "system", "content": self.SYSTEM_PROMPT}
-        ]

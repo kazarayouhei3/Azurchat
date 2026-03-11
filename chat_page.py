@@ -14,10 +14,10 @@ from PySide6.QtCore import Signal
 
 import threading
 from PySide6.QtCore import QTimer
-from use_api import Chat
+
 
 from datetime import datetime
-
+from use_api import Chat
 class ChatPage(QWidget):
     ai_reply_signal = Signal(str)
     def __init__(self, parent=None):
@@ -103,6 +103,7 @@ class ChatPage(QWidget):
         daemon=True
         )
         thread.start()
+
 
     def ask_ai(self, text):
         print("线程启动")

@@ -7,18 +7,16 @@ from PySide6.QtWidgets import (
     QMenu, QApplication
 )
 
+from api_dialog import API
 
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QSize, Qt, QPropertyAnimation, QEasingCurve, QPoint
-from PySide6.QtWidgets import QGraphicsOpacityEffect, QMessageBox
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import QFile, QPropertyAnimation, QEasingCurve
+from PySide6.QtWidgets import QGraphicsOpacityEffect, QMessageBox, QGraphicsBlurEffect
 from PySide6.QtCore import Signal
 
-import threading
 from PySide6.QtCore import QTimer
-from use_api import Chat
+import json
 
-from datetime import datetime
 import sqlite3
 
 from PySide6.QtGui import QDesktopServices
@@ -68,6 +66,7 @@ class Login(QWidget):
         self.menu_button = self.root.findChild(QToolButton, "menuButton")
 
         self.init_menu()
+
     def init_menu(self):
         self.menu = QMenu()
         self.menu.setWindowFlags(
@@ -138,8 +137,7 @@ class Login(QWidget):
                 Toast("登录成功", self)
                 self.signal.emit()
             else:
-                # self.open_api_dialog(username)
-                Toast("登录失败", self)
+                self.open_api_dialog(username)
 
         elif result == "wrong_password":
             Toast("密码错误", self)
@@ -147,6 +145,30 @@ class Login(QWidget):
         self.user.clear()
         self.password.clear()
 
+    def open_api_dialog(self, username):
+
+        # 添加模糊
+        self.blur = QGraphicsBlurEffect()
+        self.blur.setBlurRadius(15)
+        self.root.setGraphicsEffect(self.blur)
+
+        # 创建 API 页面
+        self.api = API(parent=self, username=username)
+
+        # 覆盖 Login
+        self.api.setGeometry(0, 0, self.width(), self.height())
+
+        # 关闭信号
+        self.api.signal.connect(self.close_api_dialog)
+
+        self.api.show()
+
+    def close_api_dialog(self):
+
+        # 移除模糊
+        self.root.setGraphicsEffect(None)
+
+        self.api.close()
     def check_api(self, username):
 
         conn = sqlite3.connect("chat.db")

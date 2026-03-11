@@ -23,10 +23,6 @@ class ChatCommand(QWidget):
 
         self.root.setParent(self)
 
-        # self.quit_button = self.root.findChild(QToolButton, "quit_button")
-
-        # self.quit_button.clicked.connect(self.signal.emit)
-
         self.chat = self.root.findChild(QToolButton, "chat")
         self.phone = self.root.findChild(QToolButton, "phone")
         self.my = self.root.findChild(QToolButton, "my")
