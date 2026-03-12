@@ -1,9 +1,8 @@
-
 import os
-from PySide6.QtWidgets import QWidget, QPushButton, QToolButton, QLabel
+from PySide6.QtWidgets import QWidget, QPushButton, QToolButton, QTreeWidget, QTreeWidgetItem
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, Signal, QSize, Qt, QRectF, QEvent
-from PySide6.QtGui import QIcon, QPixmap, QPainter, QPainterPath
+from PySide6.QtCore import QFile, Signal, QSize, Qt, QEvent
+from PySide6.QtGui import QIcon
 
 class Fr(QWidget):
 
@@ -62,7 +61,10 @@ class Fr(QWidget):
         self.my.clicked.connect(self.my_signal.emit)
 
         self.fr = self.root.findChild(QPushButton, "fr")
+        self.frList = self.root.findChild(QTreeWidget, "frList")
 
+        group_friend = QTreeWidgetItem(self.frList)
+        group_friend.setText(0, "我的好友")
 
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal

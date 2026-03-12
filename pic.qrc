@@ -17,5 +17,6 @@
         <file>icon/my.svg</file>
         <file>icon/my_select.svg</file>
         <file>icon/quit.svg</file>
+        <file>icon/friend.svg</file>
     </qresource>
 </RCC>

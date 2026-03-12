@@ -112,10 +112,10 @@
           <widget class="QLabel" name="label">
            <property name="font">
             <font>
-             <family>Arial</family>
+             <family>Microsoft YaHei</family>
              <pointsize>15</pointsize>
              <italic>false</italic>
-             <bold>true</bold>
+             <bold>false</bold>
              <stylestrategy>PreferDefault</stylestrategy>
             </font>
            </property>
@@ -189,6 +189,56 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QWidget" name="widget_4" native="true">
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="fr">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei</family>
+                <pointsize>15</pointsize>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 10px 10px 15px;
+    text-align: left;
+    background: transparent;
+}
+
+QPushButton:hover {
+    background-color: #e6e6e6;
+}
+
+QPushButton:pressed {
+    background-color: #d0d0d0;
+}</string>
+              </property>
+              <property name="text">
+               <string>加好友</string>
+              </property>
+              <property name="icon">
+               <iconset resource="pic.qrc">
+                <normaloff>:/icon/friend.svg</normaloff>:/icon/friend.svg</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
          <item row="2" column="0">
           <widget class="QWidget" name="widget_2" native="true">
            <property name="sizePolicy">
@@ -237,26 +287,6 @@ QToolButton {
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QToolButton" name="phone">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QToolButton {
-            border: none;
-            background: transparent;
-            color: #666;
-        }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="2">
              <widget class="QToolButton" name="my">
               <property name="sizePolicy">
@@ -279,71 +309,69 @@ QToolButton {
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QToolButton" name="phone">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QToolButton {
+            border: none;
+            background: transparent;
+            color: #666;
+        }</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QListWidget" name="list">
+          <widget class="QTreeWidget" name="frList">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
-             <verstretch>10</verstretch>
+             <verstretch>9</verstretch>
             </sizepolicy>
            </property>
            <property name="styleSheet">
-            <string notr="true">QListWidget {
-    border: none;
-    outline: none;
-    background-color: #EEF2F6;
-    padding: 10px;
+            <string notr="true">QTreeWidget{
+    border:none;
+    background:transparent;
+    outline:0;
 }
 
-QListWidget::item:selected {
-    background: transparent;
+QTreeWidget::item{
+    height:36px;
+    padding-left:10px;
+}
+
+QTreeWidget::item:hover{
+    background:#EAF3FF;
+}
+
+QTreeWidget::item:selected{
+    background:#D6E9FF;
+    color:black;
 }</string>
            </property>
-           <property name="lineWidth">
-            <number>0</number>
+           <property name="indentation">
+            <number>10</number>
            </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="fr">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
+           <property name="headerHidden">
+            <bool>true</bool>
            </property>
-           <property name="font">
-            <font>
-             <family>Arial</family>
-             <pointsize>15</pointsize>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-    background-color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    padding-left: 15px;   /* 控制整体往左贴 */
-    text-align: left;     /* 文字左对齐 */
-    border-top: 2px solid #E5E7EB;
-}
-
-QPushButton:hover {
-    background-color: #e6e6e6;
-}
-
-QPushButton:pressed {
-    background-color: #d0d0d0;
-}</string>
-           </property>
-           <property name="text">
-            <string>加好友</string>
-           </property>
+           <column>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </column>
           </widget>
          </item>
         </layout>

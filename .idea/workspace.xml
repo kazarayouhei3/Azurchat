@@ -2,22 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9a5c876-8464-4164-bd87-1012080d991c" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.qtcreator/pyproject.toml.user" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api_dialog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_dialog.ui" beforeDir="false" afterPath="$PROJECT_DIR$/api_dialog.ui" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icon/friend.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chat.db" beforeDir="false" afterPath="$PROJECT_DIR$/chat.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_info.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/form2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hipper.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/login.py.autosave" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/use_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/use_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/widget.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/widget.py.autosave" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/widget.spec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fr.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fr.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pic.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/pic.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rc_pic.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_pic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,10 +19,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="3AoFpdYLtE3XhBeM5qsHnlFx2oO" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -42,8 +34,8 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "temp",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "git-widget-placeholder": "main",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
