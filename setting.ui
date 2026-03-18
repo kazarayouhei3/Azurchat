@@ -112,7 +112,7 @@
           <widget class="QLabel" name="label">
            <property name="font">
             <font>
-             <family>Microsoft YaHei</family>
+             <family>PingFang SC</family>
              <pointsize>15</pointsize>
              <italic>false</italic>
              <bold>false</bold>
@@ -120,11 +120,11 @@
             </font>
            </property>
            <property name="text">
-            <string>通讯录</string>
+            <string>AzurChat</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
+         <item row="0" column="0">
           <widget class="QToolButton" name="quit_button">
            <property name="styleSheet">
             <string notr="true">
@@ -152,8 +152,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pic.qrc">
-             <normaloff>:/icon/quit.svg</normaloff>:/icon/quit.svg</iconset>
+            <iconset>
+             <normaloff>go.png</normaloff>go.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -189,73 +189,44 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <property name="spacing">
-          <number>0</number>
+         <property name="verticalSpacing">
+          <number>6</number>
          </property>
          <item row="0" column="0">
-          <widget class="QWidget" name="widget_4" native="true">
-           <layout class="QGridLayout" name="gridLayout_6">
-            <item row="0" column="0">
-             <widget class="QPushButton" name="fr">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>1</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <family>Microsoft YaHei</family>
-                <pointsize>15</pointsize>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton {
-    border: none;
-    border-radius: 10px;
-    padding: 10px 10px 10px 15px;
-    text-align: left;
-    background: transparent;
-}
-
-QPushButton:hover {
-    background-color: #e6e6e6;
-}
-
-QPushButton:pressed {
-    background-color: #d0d0d0;
-}</string>
-              </property>
-              <property name="text">
-               <string>加好友</string>
-              </property>
-              <property name="icon">
-               <iconset resource="pic.qrc">
-                <normaloff>:/icon/friend.svg</normaloff>:/icon/friend.svg</iconset>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QWidget" name="frList" native="true">
+          <widget class="QListWidget" name="list">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
-             <verstretch>9</verstretch>
+             <verstretch>10</verstretch>
             </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QListWidget {
+    border: none;
+    outline: none;
+    background-color: #EEF2F6;
+    padding: 10px;
+}
+
+QListWidget::item:selected {
+    background: transparent;
+}</string>
+           </property>
+           <property name="lineWidth">
+            <number>0</number>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <widget class="QWidget" name="widget_2" native="true">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>1</verstretch>
             </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
             <property name="leftMargin">
@@ -273,30 +244,6 @@ QPushButton:pressed {
             <property name="spacing">
              <number>0</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QToolButton" name="chat">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">
-
-QToolButton {
-            border: none;
-
-            color: #666;
-            border-top: 2px solid #E5E7EB;
-            background-color: #DCE3EA;
-        }</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="2">
              <widget class="QToolButton" name="my">
               <property name="sizePolicy">
@@ -306,16 +253,43 @@ QToolButton {
                </sizepolicy>
               </property>
               <property name="styleSheet">
-               <string notr="true">QToolButton {
-            border: none;
-
-            color: #666;
-            border-top: 2px solid #E5E7EB;
-            background-color: #DCE3EA;
-        }</string>
+               <string notr="true"/>
               </property>
               <property name="text">
                <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QToolButton" name="chat">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QToolButton {
+            border: none;
+            background: transparent;
+            color: #666;
+        }
+</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="popupMode">
+               <enum>QToolButton::ToolButtonPopupMode::DelayedPopup</enum>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
               </property>
              </widget>
             </item>
@@ -328,11 +302,7 @@ QToolButton {
                </sizepolicy>
               </property>
               <property name="styleSheet">
-               <string notr="true">QToolButton {
-            border: none;
-            background: transparent;
-            color: #666;
-        }</string>
+               <string notr="true"/>
               </property>
               <property name="text">
                <string/>

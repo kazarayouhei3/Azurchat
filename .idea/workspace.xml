@@ -2,19 +2,44 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9a5c876-8464-4164-bd87-1012080d991c" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/icon/friend.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fr_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icon/Tashkent.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icon/enterprise.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icon/右箭头.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/icon/箭头向下.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/Tashkent.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/enterprise.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/hipper.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/prompt/temp.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/setting.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Azurchat.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Azurchat.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat.db" beforeDir="false" afterPath="$PROJECT_DIR$/chat.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fr.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fr.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fr.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/head.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/head.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/head.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/icon/右箭头.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/icon/箭头向下.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click-2.svg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pic.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/pic.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rc_head.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_head.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rc_pic.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_pic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/use_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/use_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/widget.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -32,13 +57,22 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "git-widget-placeholder": "main",
+    "last_opened_file_path": "D:/Azurchat/prompt",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Azurchat\prompt" />
+      <recent name="D:\Azurchat" />
+      <recent name="D:\Azurchat\icon" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -55,6 +89,13 @@
       <option name="presentableId" value="Default" />
       <updated>1773251201020</updated>
       <workItem from="1773251203367" duration="9000" />
+      <workItem from="1773383154537" duration="1830000" />
+      <workItem from="1773721452515" duration="5554000" />
+      <workItem from="1773732202786" duration="87000" />
+      <workItem from="1773752460735" duration="943000" />
+      <workItem from="1773800809175" duration="5182000" />
+      <workItem from="1773833118079" duration="4303000" />
+      <workItem from="1773840999673" duration="4577000" />
     </task>
     <servers />
   </component>

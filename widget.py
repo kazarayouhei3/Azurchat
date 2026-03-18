@@ -38,7 +38,7 @@ class Widget(QWidget):
         self.info = ChatCommand()
 
         self.login = Login()
-        # self.page_chat = ChatPage()
+
         self.page_chat = None
 
         self.reg = Reg()
@@ -62,13 +62,6 @@ class Widget(QWidget):
 
         self.ui.quit_button.clicked.connect(self.close)
 
-        # self.login.signal.connect(
-        #     lambda: self.stack.setCurrentWidget(self.page_list)
-        # )
-
-        # self.page_chara.back_signal.connect(
-        #     lambda: self.stack.setCurrentWidget(self.page_chat)
-        # )
         self.login.signal.connect(self.after_login)
 
         self.login.reg_signal.connect(
@@ -83,10 +76,6 @@ class Widget(QWidget):
             lambda: self.stack.setCurrentWidget(self.login)
         )
 
-        # ⭐ 绑定返回按钮（通过 ChatPage 提供的方法）
-        # self.page_chat.bind_back(lambda: self.stack.setCurrentWidget(self.page_list))
-
-
         # 点击会话进入聊天页
         self.ui.list.itemClicked.connect(self.open_chat_in_place)
 
@@ -95,10 +84,10 @@ class Widget(QWidget):
         self._play_index = 0
 
         self._chat_data = [
-            ("希佩尔", " ", datetime.now().strftime("%H:%M")),
+            ("希佩尔", "", datetime.now().strftime("%H:%M"), ":/new/prefix3/icon/hipper.png"),
+            ("企业", " ", datetime.now().strftime("%H:%M"), ":/new/prefix3/icon/enterprise.png"),
+            ("塔什干", " ", datetime.now().strftime("%H:%M"), ":/new/prefix3/icon/Tashkent.png"),
         ]
-
-        QTimer.singleShot(2000, self.start_intro_anim)
 
         self.drag_bar = self.ui.AzurChat
 
@@ -194,6 +183,7 @@ class Widget(QWidget):
         self._drag_pos = None
 
     def start_intro_anim(self):
+        self.ui.list.clear()  # ❗必须加
         self._play_index = 0
         self.play_next_one()
 
@@ -201,10 +191,10 @@ class Widget(QWidget):
         if self._play_index >= len(self._chat_data):
             return
 
-        name, msg, time_text = self._chat_data[self._play_index]
+        name, msg, time_text, avatar_path = self._chat_data[self._play_index]
         self._play_index += 1
 
-        item_widget = ChatItem(name, msg, time_text)
+        item_widget = ChatItem(name, msg, time_text, avatar_path)
 
         item = QListWidgetItem(self.ui.list)
         item.setSizeHint(QSize(0, 64))
@@ -213,37 +203,44 @@ class Widget(QWidget):
 
         self.ui.list.scrollToBottom()
 
-        target = item_widget.content
-        item_widget.show()
+        # ❗延迟执行动画（关键）
+        QTimer.singleShot(0, lambda: self.run_anim(item_widget))
 
+    def run_anim(self, item_widget):
+        target = item_widget
+
+        # ❗确保拿到的是最终布局位置
         end_pos = target.pos()
-        start_pos = QPoint(end_pos.x() + 260, end_pos.y())
-        overshoot = QPoint(end_pos.x() - 12, end_pos.y())
+
+        start_pos = QPoint(end_pos.x() + 300, end_pos.y())
+        overshoot = QPoint(end_pos.x() - 10, end_pos.y())
 
         target.move(start_pos)
 
         anim1 = QPropertyAnimation(target, b"pos", self)
-        anim1.setDuration(350)
+        anim1.setDuration(300)
         anim1.setStartValue(start_pos)
         anim1.setEndValue(overshoot)
         anim1.setEasingCurve(QEasingCurve.OutExpo)
 
         anim2 = QPropertyAnimation(target, b"pos", self)
-        anim2.setDuration(200)
+        anim2.setDuration(150)
         anim2.setStartValue(overshoot)
         anim2.setEndValue(end_pos)
         anim2.setEasingCurve(QEasingCurve.OutCubic)
 
         anim1.finished.connect(anim2.start)
-        anim2.finished.connect(lambda: QTimer.singleShot(180, self.play_next_one))
+
+        # ❗下一个人延迟
+        anim2.finished.connect(lambda: QTimer.singleShot(300, self.play_next_one))
 
         self._anims.extend([anim1, anim2])
         anim1.start()
 
-    def after_login(self):
+    def after_login(self, role):
 
         if not self.page_chat:
-            self.page_chat = ChatPage()
+            self.page_chat = ChatPage(role)
 
             self.stack.addWidget(self.page_chat)
 
@@ -254,8 +251,13 @@ class Widget(QWidget):
             self.page_chat.bind_open_chara(
                 lambda: self.stack.setCurrentWidget(self.page_chara)
             )
+        else:
+            # ❗已经存在 → 切换角色
+            self.page_chat.set_role(role)
 
         self.stack.setCurrentWidget(self.page_list)
+        QTimer.singleShot(100, self.start_intro_anim)
+
     # ===== 切换聊天页 =====
     def open_chat_in_place(self, item: QListWidgetItem):
         w = self.ui.list.itemWidget(item)

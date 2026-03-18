@@ -1,8 +1,12 @@
 import os
-from PySide6.QtWidgets import QWidget, QPushButton, QToolButton, QTreeWidget, QTreeWidgetItem
+from PySide6.QtWidgets import QWidget, QPushButton, QToolButton, QTreeWidget, QTreeWidgetItem, QAbstractItemView, QVBoxLayout
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Signal, QSize, Qt, QEvent
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QColor, QBrush
+from PySide6.QtWidgets import QScrollArea
+
+from fr_widget import GroupWidget
+
 
 class Fr(QWidget):
 
@@ -13,7 +17,6 @@ class Fr(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
         loader = QUiLoader()
 
         base_dir = os.path.dirname(__file__)
@@ -60,11 +63,49 @@ class Fr(QWidget):
         self.chat.clicked.connect(self.chat_signal.emit)
         self.my.clicked.connect(self.my_signal.emit)
 
-        self.fr = self.root.findChild(QPushButton, "fr")
-        self.frList = self.root.findChild(QTreeWidget, "frList")
+        self.data = [
+            {
+                "name": "朋友",
+                "items": []
+            },
+            {
+                "name": "家人",
+                "items": []
+            }
+        ]
+        self.container = self.root.findChild(QWidget, "frList")
 
-        group_friend = QTreeWidgetItem(self.frList)
-        group_friend.setText(0, "我的好友")
+        # ===== Scroll =====
+        self.scroll = QScrollArea(self.container)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setStyleSheet("border:none; background:transparent;")
+
+        outer_layout = QVBoxLayout(self.container)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+        outer_layout.addWidget(self.scroll)
+
+        # ===== inner =====
+        self.inner = QWidget()
+        self.layout = QVBoxLayout(self.inner)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+
+        self.scroll.setWidget(self.inner)
+
+        # ===== 渲染数据 =====
+        for group in self.data:
+            g = GroupWidget(group["name"])
+
+            for item in group["items"]:
+                g.add_item(item)
+
+            self.layout.addWidget(g)
+
+        self.layout.addStretch()
+
+    def on_item_clicked(self, name):
+        self.chat_signal.emit(name)
 
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal
@@ -80,20 +121,4 @@ class Fr(QWidget):
             btn.setIcon(QIcon(icon_normal))
             btn.setIconSize(QSize(20, 20))
             btn.installEventFilter(self)
-
-    def eventFilter(self, obj, event):
-
-        if hasattr(obj, "_icon_normal"):
-
-            if event.type() == QEvent.Enter:
-                if not obj.isChecked():
-                    obj.setIcon(QIcon(obj._icon_active))
-
-            elif event.type() == QEvent.Leave:
-                    if not obj.isChecked():
-                        obj.setIcon(QIcon(obj._icon_normal))
-
-        return super().eventFilter(obj, event)
-
-
 

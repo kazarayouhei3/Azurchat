@@ -20,7 +20,7 @@ from datetime import datetime
 from use_api import Chat
 class ChatPage(QWidget):
     ai_reply_signal = Signal(str)
-    def __init__(self, parent=None):
+    def __init__(self, role="hipper", parent=None):
         super().__init__(parent)
 
         # ===== 1️⃣ 加载 UI =====
@@ -78,9 +78,16 @@ class ChatPage(QWidget):
         if self.send_btn:
             self.send_btn.clicked.connect(self.send_message)
         self.last_message_time = None
-        self.chat_engine = Chat()
+        self.role = role
+        self.chat_engine = Chat(self.role)
 
         self.ai_reply_signal.connect(self.show_reply)
+
+    def set_role(self, role):
+        self.role = role
+
+        # ❗重新创建AI引擎（关键）
+        self.chat_engine = Chat(role)
 
     def send_message(self):
         text = self.input.text().strip()

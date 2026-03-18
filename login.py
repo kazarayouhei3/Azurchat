@@ -23,7 +23,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl, Qt
 
 class Login(QWidget):
-    signal = Signal()
+    signal = Signal(str)
     reg_signal = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)

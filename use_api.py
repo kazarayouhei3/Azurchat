@@ -28,13 +28,11 @@ class Chat():
             base_url=base_url
         )
 
-        persona_file = resource_path(f"{self.role}.txt")
+        persona_file = resource_path(f"prompt/{self.role}.txt")
         self.persona_text = self.load_persona_from_txt(persona_file)
 
         self.SYSTEM_PROMPT = f"""
-            你必须始终扮演以下角色设定，不允许偏离。
             {self.persona_text}
-            请保持角色语气，不要解释你是AI。
             """
 
         self.messages = [

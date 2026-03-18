@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout
 from PySide6.QtGui import QPainter, QPainterPath, QPixmap
 from PySide6.QtCore import Qt, QRectF
+import rc_head
 
 class ChatItem(QWidget):
     def __init__(self, name, message, time_text, avatar_path="", parent=None):
@@ -23,7 +24,7 @@ class ChatItem(QWidget):
         self.avatar = QLabel()
         self.avatar.setFixedSize(44, 44)
         self.avatar.setStyleSheet("background:#ddd; border-radius:22px;")
-        pix = self.get_round_pixmap(":/new/prefix1/head.png", 44)
+        pix = self.get_round_pixmap(avatar_path, 44)
 
         if not pix.isNull():
             self.avatar.setPixmap(pix)
