@@ -19,6 +19,8 @@ import sqlite3
 
 import json
 
+from db import update_user_api
+
 class API(QWidget):
     signal = Signal()
     reg_signal = Signal()
@@ -104,19 +106,6 @@ class API(QWidget):
         except:
             return None
 
-    def save_api(self, api, url):
-
-        conn = sqlite3.connect("chat.db")
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "UPDATE users SET api=?, url=? WHERE username=?",
-            (api, url, self.username)
-        )
-
-        conn.commit()
-        conn.close()
-
     def handle_model(self):
 
         api = self.api.text().strip()
@@ -139,7 +128,7 @@ class API(QWidget):
 
 
         # 保存 API 和 URL
-        self.save_api(api, url)
+        update_user_api(self.username, api, url)
 
         Toast("模型加载成功", self)
 

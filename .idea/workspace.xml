@@ -2,30 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9a5c876-8464-4164-bd87-1012080d991c" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/fr_widget.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icon/Tashkent.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icon/enterprise.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icon/右箭头.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icon/箭头向下.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prompt/Tashkent.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prompt/enterprise.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prompt/hipper.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prompt/temp.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/setting.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Azurchat.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Azurchat.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9c39d5b6-5591-465d-afdb-42e98011aac7.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9c39d5b6-5591-465d-afdb-42e98011aac7.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chat_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api_dialog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat.db" beforeDir="false" afterPath="$PROJECT_DIR$/chat.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chat_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fr.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fr.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/head.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/head.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/head.qrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/右箭头.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/箭头向下.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click-2.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pic.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/pic.qrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rc_head.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_head.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rc_pic.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_pic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/form_chat.ui" beforeDir="false" afterPath="$PROJECT_DIR$/form_chat.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reg.py" beforeDir="false" afterPath="$PROJECT_DIR$/reg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/use_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/use_api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/widget.py" afterDir="false" />
     </list>
@@ -60,7 +47,8 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "main",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "temp",
     "last_opened_file_path": "D:/Azurchat/prompt",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"
@@ -95,7 +83,8 @@
       <workItem from="1773752460735" duration="943000" />
       <workItem from="1773800809175" duration="5182000" />
       <workItem from="1773833118079" duration="4303000" />
-      <workItem from="1773840999673" duration="4577000" />
+      <workItem from="1773840999673" duration="4828000" />
+      <workItem from="1773893457574" duration="16004000" />
     </task>
     <servers />
   </component>

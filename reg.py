@@ -14,11 +14,8 @@ from PySide6.QtCore import Signal
 
 import threading
 from PySide6.QtCore import QTimer
-from use_api import Chat
 
-from datetime import datetime
-import sqlite3
-
+from db import register_user
 class Reg(QWidget):
     signal = Signal()
     b_signal = Signal()
@@ -71,7 +68,7 @@ class Reg(QWidget):
             Toast("用户名或密码长度不能少于8位", self)
             return
 
-        result = self.register_user(username, password)
+        result = register_user(username, password)
 
         if result == "created":
             Toast("注册成功", self)
@@ -82,39 +79,6 @@ class Reg(QWidget):
 
         self.user.clear()
         self.password.clear()
-
-    def register_user(self, username, password):
-        conn = sqlite3.connect("chat.db")
-        cursor = conn.cursor()
-
-        cursor.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE,
-                    password TEXT
-                )
-            """)
-
-        # 先查是否存在
-        cursor.execute(
-                "SELECT id FROM users WHERE username=?",
-                (username,)
-            )
-        result = cursor.fetchone()
-
-        if result is not None:
-            conn.close()
-            return "exist"
-
-            # 不存在 → 创建
-        cursor.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, password)
-            )
-        conn.commit()
-        conn.close()
-
-        return "created"
 
 
 

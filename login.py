@@ -21,9 +21,10 @@ import sqlite3
 
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl, Qt
+from db import check_user, check_api
 
 class Login(QWidget):
-    signal = Signal(str)
+    signal = Signal()
     reg_signal = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -125,13 +126,13 @@ class Login(QWidget):
             Toast("用户名或密码长度不能少于8位", self)
             return
 
-        result = self.check_user(username, password)
+        result = check_user(username, password)
 
         if result == "not_exist":
             Toast("用户不存在", self)
 
         elif result == "success":
-            api_ok = self.check_api(username)
+            api_ok = check_api(username)
 
             if api_ok:
                 Toast("登录成功", self)
@@ -169,65 +170,6 @@ class Login(QWidget):
         self.root.setGraphicsEffect(None)
 
         self.api.close()
-    def check_api(self, username):
-
-        conn = sqlite3.connect("chat.db")
-        cursor = conn.cursor()
-
-        cursor.execute(
-        "SELECT api, url FROM users WHERE username=?",
-        (username,)
-        )
-
-        result = cursor.fetchone()
-        conn.close()
-
-        # 没有 API
-        if result is None:
-            return False
-
-        api = result[0]
-        url = result[1]
-
-        if not api or not url:
-            return False
-
-        # 检查 API 是否可用
-        return True
-
-    def check_user(self, username, password):
-        conn = sqlite3.connect("chat.db")
-        cursor = conn.cursor()
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT,
-            api TEXT,
-            url TEXT
-        )
-        """)
-
-        cursor.execute(
-                "SELECT password FROM users WHERE username=?",
-                (username,)
-            )
-        result = cursor.fetchone()
-
-        # 用户不存在
-        if result is None:
-            conn.close()
-            return "not_exist"
-
-        # 用户存在 → 校验密码
-        stored_password = result[0]
-        if stored_password == password:
-            conn.close()
-            return "success"
-        else:
-            conn.close()
-            return "wrong_password"
 
 class Toast(QLabel):
     def __init__(self, text, parent=None):

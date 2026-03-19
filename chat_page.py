@@ -2,28 +2,29 @@ import os
 from PySide6.QtWidgets import (
     QWidget, QToolButton, QLabel,
     QHBoxLayout, QListWidget,
-    QListWidgetItem, QSizePolicy,
-    QLineEdit, QPushButton,
-    QMenu
+    QListWidgetItem, QLineEdit, QPushButton
 )
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QSize, Qt, QPropertyAnimation, QEasingCurve, QPoint
-from PySide6.QtWidgets import QGraphicsOpacityEffect
-from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QFile, QSize, Qt, Signal, QTimer
+from PySide6.QtGui import QIcon
 
 import threading
-from PySide6.QtCore import QTimer
-
-
 from datetime import datetime
 from use_api import Chat
+
+
 class ChatPage(QWidget):
-    ai_reply_signal = Signal(str)
-    def __init__(self, role="hipper", parent=None):
+    ai_reply_signal = Signal(object)
+
+    def __init__(self, parent=None):
         super().__init__(parent)
 
-        # ===== 1️⃣ 加载 UI =====
+        self.role = None
+        self.chat_history = {}
+        self.chat_engines = {}
+        self.is_loading = False
+
+        # ===== UI加载 =====
         loader = QUiLoader()
         base_dir = os.path.dirname(__file__)
         ui_path = os.path.join(base_dir, "form_chat.ui")
@@ -32,257 +33,224 @@ class ChatPage(QWidget):
         file.open(QFile.ReadOnly)
         self.root = loader.load(file)
         file.close()
-
-        # 把 UI 根挂到当前页面
         self.root.setParent(self)
 
-        # ===== 2️⃣ 获取 UI 控件 =====
+        # ===== 控件 =====
         self.back_button = self.root.findChild(QToolButton, "mainButton")
-        self.title_label = self.root.findChild(QLabel, "label")
+        self.title_label = self.root.findChild(QLabel, "chara")
         self.list = self.root.findChild(QListWidget, "listWidget")
 
-        # ===== 3️⃣ 设置返回按钮图标 =====
         if self.back_button:
             icon_path = os.path.join(base_dir, "go.png")
             self.back_button.setIcon(QIcon(icon_path))
             self.back_button.setIconSize(QSize(24, 24))
             self.back_button.setFixedSize(30, 30)
-            self.back_button.setToolButtonStyle(Qt.ToolButtonIconOnly)
 
-        tool_button = self.root.findChild(QToolButton, "toolButton")
-
-        if tool_button:
-            tool_button.setPopupMode(QToolButton.InstantPopup)
-
-
-        # ===== 4️⃣ 配置 listWidget =====
         if self.list:
-            self.list.setUniformItemSizes(False)
-            self.list.setVerticalScrollMode(QListWidget.ScrollPerPixel)
-            self.list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
             self.list.setStyleSheet("""
                 QListWidget {
                     border: none;
-                    outline: none;
                     background-color: #EEF2F6;
                     padding: 10px;
                 }
-                QListWidget::item:selected {
-                    background: transparent;
-                }
             """)
+
         self.original_title = ""
         self.input = self.root.findChild(QLineEdit, "lineEdit")
         self.send_btn = self.root.findChild(QPushButton, "pushButton")
+
         if self.send_btn:
             self.send_btn.clicked.connect(self.send_message)
+
         self.last_message_time = None
-        self.role = role
-        self.chat_engine = Chat(self.role)
+        self.chat_engine = None
 
         self.ai_reply_signal.connect(self.show_reply)
 
+    # =============================
+    # ⭐ 切换角色
+    # =============================
     def set_role(self, role):
         self.role = role
 
-        # ❗重新创建AI引擎（关键）
-        self.chat_engine = Chat(role)
+        # 👉 复用Chat实例（保证上下文）
+        if role not in self.chat_engines:
+            self.chat_engines[role] = Chat(role)
 
+        self.chat_engine = self.chat_engines[role]
+
+        self.load_chat(role)
+        self.last_message_time = None
+
+    # =============================
+    # 发送消息
+    # =============================
     def send_message(self):
+        if not self.chat_engine:
+            return
+
         text = self.input.text().strip()
         if not text:
             return
 
-    # 1️⃣ 清空输入框
         self.input.clear()
 
-    # 2️⃣ 显示右侧用户消息
         self.add_right_message(text)
 
-    # 3️⃣ 添加一个“思考中...”占位
         QTimer.singleShot(800, self.show_typing_in_title)
 
-    # 4️⃣ 开线程调用AI（防止UI卡死）
+        current_role = self.role
+
         thread = threading.Thread(
-        target=self.ask_ai,
-        args=(text,),
-        daemon=True
+            target=self.ask_ai,
+            args=(text, current_role),
+            daemon=True
         )
         thread.start()
 
-
-    def ask_ai(self, text):
-        print("线程启动")
-
+    # =============================
+    # AI调用
+    # =============================
+    def ask_ai(self, text, role):
         try:
-            reply = self.chat_engine.chat(text)
+            reply = self.chat_engines[role].chat(text)
         except Exception as e:
             reply = f"请求失败：{str(e)}"
 
-        self.ai_reply_signal.emit(reply)
+        self.ai_reply_signal.emit((role, reply))
 
-    def show_reply(self, reply):
+    def show_reply(self, data):
+        role, reply = data
+
+        if role != self.role:
+            return
+
         QTimer.singleShot(1500, lambda: self._final_reply(reply))
 
     def _final_reply(self, reply):
-            # 删除最后一个“正在输入”
         if self.title_label:
             self.title_label.setText(self.original_title)
 
         self.add_left_message(reply)
 
-    def add_left_message(self, text: str):
+    # =============================
+    # 加载聊天记录
+    # =============================
+    def load_chat(self, role):
+        self.is_loading = True
+        self.list.clear()
+
+        history = self.chat_history.get(role, [])
+
+        for msg_type, text in history:
+            if msg_type == "left":
+                self.add_left_message(text)
+            elif msg_type == "right":
+                self.add_right_message(text)
+            elif msg_type == "time":
+                self.add_time_label(text)
+
+        self.is_loading = False
+
+    # =============================
+    # 左气泡（AI）
+    # =============================
+    def add_left_message(self, text):
         self.check_and_add_time()
-        if not self.list:
-            return
 
         item = QListWidgetItem()
-
-        bubble_widget = QWidget()
-        layout = QHBoxLayout(bubble_widget)
-        layout.setContentsMargins(10, 5, 50, 5)
-        layout.setSpacing(8)
-
-        avatar = QLabel()
-        pixmap = QPixmap(":/new/prefix1/head.png").scaled(36, 36)
-        avatar.setPixmap(pixmap)
-        avatar.setFixedSize(36, 36)
 
         bubble = QLabel(text)
         bubble.setWordWrap(True)
         bubble.setMaximumWidth(300)
+        bubble.setStyleSheet("background:white; padding:8px; border-radius:10px;")
 
-        bubble.setStyleSheet("""
-            QLabel {
-                background-color: white;
-                border-radius: 12px;
-                padding: 8px 20px;
-                font-size: 14px;
-            }
-        """)
-
-        layout.addWidget(avatar)
+        layout = QHBoxLayout()
         layout.addWidget(bubble)
         layout.addStretch()
 
-        self.list.addItem(item)
-        self.list.setItemWidget(item, bubble_widget)
+        widget = QWidget()
+        widget.setLayout(layout)
 
-        bubble_widget.adjustSize()
-        item.setSizeHint(bubble_widget.sizeHint())
+        self.list.addItem(item)
+        self.list.setItemWidget(item, widget)
+        item.setSizeHint(widget.sizeHint())
 
         self.list.scrollToBottom()
 
-        opacity = QGraphicsOpacityEffect()
-        bubble_widget.setGraphicsEffect(opacity)
-        opacity.setOpacity(0)
+        if not self.is_loading:
+            self.chat_history.setdefault(self.role, []).append(("left", text))
 
-        fade_anim = QPropertyAnimation(opacity, b"opacity")
-        fade_anim.setDuration(300)
-        fade_anim.setStartValue(0)
-        fade_anim.setEndValue(1)
-        fade_anim.setEasingCurve(QEasingCurve.OutCubic)
-
-        # 2️⃣ 位置动画
-        pos_anim = QPropertyAnimation(bubble_widget, b"pos")
-        pos_anim.setDuration(300)
-        start_pos = bubble_widget.pos() - QPoint(30, 0)
-        end_pos = bubble_widget.pos()
-
-        bubble_widget.move(start_pos)
-
-        pos_anim.setStartValue(start_pos)
-        pos_anim.setEndValue(end_pos)
-        pos_anim.setEasingCurve(QEasingCurve.OutCubic)
-
-        # 防止被垃圾回收
-        self._fade_anim = fade_anim
-        self._pos_anim = pos_anim
-
-        fade_anim.start()
-        pos_anim.start()
     # =============================
-    # 右侧气泡
+    # 右气泡（用户）
     # =============================
-    def add_right_message(self, text: str):
+    def add_right_message(self, text):
         self.check_and_add_time()
-        if not self.list:
-            return
 
         item = QListWidgetItem()
-
-        bubble_widget = QWidget()
-        layout = QHBoxLayout(bubble_widget)
-        layout.setContentsMargins(50, 5, 10, 5)
 
         bubble = QLabel(text)
         bubble.setWordWrap(True)
         bubble.setMaximumWidth(380)
+        bubble.setStyleSheet("background:#95EC69; padding:8px; border-radius:10px;")
 
-        bubble.setStyleSheet("""
-            QLabel {
-                background-color: #95EC69;
-                border-radius: 12px;
-                padding: 8px 20px;
-                font-size: 14px;
-            }
-        """)
-
+        layout = QHBoxLayout()
         layout.addStretch()
         layout.addWidget(bubble)
 
-        self.list.addItem(item)
-        self.list.setItemWidget(item, bubble_widget)
+        widget = QWidget()
+        widget.setLayout(layout)
 
-        bubble_widget.adjustSize()
-        item.setSizeHint(bubble_widget.sizeHint())
+        self.list.addItem(item)
+        self.list.setItemWidget(item, widget)
+        item.setSizeHint(widget.sizeHint())
 
         self.list.scrollToBottom()
 
-    # =============================
-    # 绑定按钮
-    # =============================
-    def bind_back(self, callback):
-        if self.back_button:
-            self.back_button.clicked.connect(callback)
-    def set_title(self, title: str):
-        if self.title_label:
-            self.original_title = title
-            self.title_label.setText(title)
-    def add_time_label(self, time_text: str):
-        item = QListWidgetItem()
+        if not self.is_loading:
+            self.chat_history.setdefault(self.role, []).append(("right", text))
 
-        label = QLabel(time_text)
+    # =============================
+    # 时间
+    # =============================
+    def add_time_label(self, text):
+        item = QListWidgetItem()
+        label = QLabel(text)
         label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("""
-                    QLabel {
-                        color: gray;
-                        font-size: 12px;
-                        padding: 4px;
-                    }
-                """)
 
         self.list.addItem(item)
         self.list.setItemWidget(item, label)
         item.setSizeHint(label.sizeHint())
 
+        if not self.is_loading:
+            self.chat_history.setdefault(self.role, []).append(("time", text))
+
     def check_and_add_time(self):
         now = datetime.now()
 
-        if self.last_message_time is None:
-                # 第一条消息
+        if not self.last_message_time:
             self.add_time_label(now.strftime("%H:%M"))
         else:
-            delta = (now - self.last_message_time).total_seconds()
-            if delta >= 60:
+            if (now - self.last_message_time).total_seconds() >= 60:
                 self.add_time_label(now.strftime("%H:%M"))
 
         self.last_message_time = now
 
+    # =============================
+    # 其他
+    # =============================
+    def set_title(self, title):
+        self.original_title = title
+        if self.title_label:
+            self.title_label.setText(title)
+
     def show_typing_in_title(self):
         if self.title_label:
             self.title_label.setText("对方正在输入...")
+
+    def bind_back(self, callback):
+        if self.back_button:
+            self.back_button.clicked.connect(callback)
 
     def bind_open_chara(self, callback):
         tool_button = self.root.findChild(QToolButton, "menu")

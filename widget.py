@@ -20,10 +20,13 @@ from login import Login
 from reg import Reg
 from fr import Fr
 
+from db import init_db,  get_conversations_with_avatar
+
+
 class Widget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        init_db()
         # ===== 主列表页 =====
         self.ui = Ui_Widget()
         self.ui.setupUi(self)
@@ -82,6 +85,7 @@ class Widget(QWidget):
         # ===== 动画数据 =====
         self._anims = []
         self._play_index = 0
+
 
         self._chat_data = [
             ("希佩尔", "", datetime.now().strftime("%H:%M"), ":/new/prefix3/icon/hipper.png"),
@@ -237,10 +241,10 @@ class Widget(QWidget):
         self._anims.extend([anim1, anim2])
         anim1.start()
 
-    def after_login(self, role):
+    def after_login(self):
 
         if not self.page_chat:
-            self.page_chat = ChatPage(role)
+            self.page_chat = ChatPage()
 
             self.stack.addWidget(self.page_chat)
 
@@ -251,9 +255,6 @@ class Widget(QWidget):
             self.page_chat.bind_open_chara(
                 lambda: self.stack.setCurrentWidget(self.page_chara)
             )
-        else:
-            # ❗已经存在 → 切换角色
-            self.page_chat.set_role(role)
 
         self.stack.setCurrentWidget(self.page_list)
         QTimer.singleShot(100, self.start_intro_anim)
@@ -261,13 +262,24 @@ class Widget(QWidget):
     # ===== 切换聊天页 =====
     def open_chat_in_place(self, item: QListWidgetItem):
         w = self.ui.list.itemWidget(item)
-        title = w.name_label.text() if w else "聊天"
+        role = w.name_label.text() if w else "聊天"
 
-        # 通过 ChatPage 提供的 set_title 方法设置标题
-        self.page_chat.set_title(title)
+        # ⭐ 关键：传角色
+        self.page_chat.set_role(role)
 
-        # 切换页面
+        # 设置标题
+        self.page_chat.set_title(role)
+
+        # 切页面
         self.stack.setCurrentWidget(self.page_chat)
+
+    def load_chat_data(self, username):
+        data = get_conversations_with_avatar(username)
+
+        self._chat_data = [
+            (name, msg or "", t or "", avatar or "")
+            for name, msg, t, avatar in data
+        ]
 
     def bind_open_info(self, callback):
         tool_button = self.root.findChild(QToolButton, "menu")

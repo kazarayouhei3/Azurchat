@@ -129,7 +129,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="chara">
            <property name="font">
             <font>
              <family>PingFang SC</family>
@@ -139,8 +139,12 @@
              <stylestrategy>PreferDefault</stylestrategy>
             </font>
            </property>
+           <property name="styleSheet">
+            <string notr="true">
+</string>
+           </property>
            <property name="text">
-            <string>希佩尔</string>
+            <string/>
            </property>
           </widget>
          </item>
