@@ -29,6 +29,9 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <property name="verticalSpacing">
+    <number>4</number>
+   </property>
    <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <property name="sizePolicy">
@@ -38,7 +41,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #EEF2F6;</string>
+      <string notr="true">background-color: #ECF3FA;</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -76,7 +79,7 @@
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: #F5F9FC;</string>
+         <string notr="true">background-color: #FFFFFF;</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <property name="topMargin">
@@ -95,19 +98,6 @@
            </property>
           </spacer>
          </item>
-         <item row="0" column="1">
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
          <item row="0" column="2">
           <widget class="QLabel" name="label">
            <property name="font">
@@ -120,9 +110,22 @@
             </font>
            </property>
            <property name="text">
-            <string>设置</string>
+            <string>新朋友</string>
            </property>
           </widget>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item row="0" column="0">
           <widget class="QToolButton" name="quit_button">
@@ -152,8 +155,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset>
-             <normaloff>go.png</normaloff>go.png</iconset>
+            <iconset resource="pic.qrc">
+             <normaloff>:/new/prefix1/go.png</normaloff>:/new/prefix1/go.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -166,8 +169,14 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QWidget" name="widget_3" native="true">
+      <item row="3" column="0">
+       <widget class="QWidget" name="widget_fr" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>15</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>PingFang SC</family>
@@ -189,127 +198,49 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <property name="verticalSpacing">
-          <number>6</number>
+         <property name="spacing">
+          <number>0</number>
          </property>
          <item row="0" column="0">
-          <widget class="QListWidget" name="list">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>10</verstretch>
-            </sizepolicy>
-           </property>
+          <widget class="QWidget" name="friend_widget" native="true"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QWidget" name="widget_2" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: #FFFFFF;</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QLineEdit" name="search">
            <property name="styleSheet">
-            <string notr="true">QListWidget {
-    border: none;
-    outline: none;
-    background-color: #EEF2F6;
-    padding: 10px;
-}
-
-QListWidget::item:selected {
-    background: transparent;
-}</string>
-           </property>
-           <property name="lineWidth">
-            <number>0</number>
+            <string notr="true">    background-color: white;
+    border-radius: 12px;
+    padding: 5px;
+border: 1px solid #E0E0E0;</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QWidget" name="widget_2" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="searchButton">
            <property name="styleSheet">
-            <string notr="true"/>
+            <string notr="true">border: 0px;</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_5">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <item row="0" column="2">
-             <widget class="QToolButton" name="my">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QToolButton" name="chat">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QToolButton {
-            border: none;
-            background: transparent;
-            color: #666;
-        }
-</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="popupMode">
-               <enum>QToolButton::ToolButtonPopupMode::DelayedPopup</enum>
-              </property>
-              <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QToolButton" name="phone">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="pic.qrc">
+             <normaloff>:/icon/search.svg</normaloff>:/icon/search.svg</iconset>
+           </property>
           </widget>
          </item>
         </layout>

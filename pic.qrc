@@ -4,6 +4,7 @@
         <file>send.png</file>
         <file>set.png</file>
         <file>azur.ico</file>
+        <file>go.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icon/del.png</file>
@@ -19,5 +20,11 @@
         <file>icon/friend.svg</file>
         <file>icon/click.svg</file>
         <file>icon/click-2.svg</file>
+        <file>icon/search.svg</file>
+    </qresource>
+    <qresource prefix="/head">
+        <file>icon/enterprise.png</file>
+        <file>icon/hipper.png</file>
+        <file>icon/Tashkent.png</file>
     </qresource>
 </RCC>

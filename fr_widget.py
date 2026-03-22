@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
-from PySide6.QtCore import Signal, QPropertyAnimation, QEasingCurve, Property
-from PySide6.QtGui import QPixmap, QPainter, QTransform
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide6.QtCore import Signal, Qt, QPropertyAnimation, QEasingCurve, Property, QRectF
+from PySide6.QtGui import QPixmap, QPainter, QTransform, QPainterPath
 from PySide6.QtSvg import QSvgRenderer
 
 class ArrowLabel(QLabel):
@@ -110,31 +110,99 @@ class GroupWidget(QWidget):
         self.update_title()
 
     # ===== 添加好友 =====
-    def add_item(self, name):
-        label = QLabel(name)
-        label.setFixedHeight(36)
-        label.setStyleSheet("""
-            QLabel {
-                padding-left:10px;
+    def add_item(self, friend_id, name, avatar_path="", desc="", show_add=True):
+        item = QWidget()
+        layout = QHBoxLayout(item)
+        layout.setContentsMargins(10, 6, 10, 6)
+        layout.setSpacing(10)
+
+        # ===== 头像 =====
+        avatar = QLabel()
+        avatar.setFixedSize(40, 40)
+
+        pix = self.get_round_pixmap(avatar_path, 40)
+        if not pix.isNull():
+            avatar.setPixmap(pix)
+
+        layout.addWidget(avatar)
+
+        # ===== 中间 =====
+        text_layout = QVBoxLayout()
+        text_layout.setSpacing(2)
+
+        name_label = QLabel(name)
+        name_label.setStyleSheet("font-size:14px; font-weight:600;")
+
+        desc_label = QLabel(desc)
+        desc_label.setStyleSheet("font-size:12px; color:#888;")
+
+        text_layout.addWidget(name_label)
+        text_layout.addWidget(desc_label)
+
+        layout.addLayout(text_layout, 1)
+
+        # ===== 按钮 =====
+        btn = QPushButton("添加")
+        btn.setFixedHeight(28)
+        btn.setMinimumWidth(60)
+
+        btn.setStyleSheet("""
+            QPushButton {
+                background:#409EFF;
+                color:white;
+                border:none;
+                border-radius:14px;
+                padding:0 12px;
             }
-            QLabel:hover {
-                background:#EAEAEA;
+            QPushButton:hover {
+                background:#66b1ff;
+            }
+            QPushButton:pressed {
+                background:#3a8ee6;
+            }
+        """)
+
+        btn.clicked.connect(lambda: self.item_signal.emit(friend_id))
+
+        # ⭐关键：控制显示
+        if show_add:
+            layout.addWidget(btn)
+
+        # ===== hover =====
+        item.setStyleSheet("""
+            QWidget:hover {
+                background:#F5F7FA;
                 border-radius:6px;
             }
         """)
 
-        label.mousePressEvent = lambda e, n=name: self.item_signal.emit(n)
+        # ===== 整行点击（推荐）=====
+        item.mousePressEvent = lambda e, fid=friend_id: self.item_signal.emit(fid)
 
-        self.content_layout.addWidget(label)
+        # ===== 存数据（给搜索用）=====
+        item.setProperty("friend_id", friend_id)
+        item.setProperty("name", name)
+        item.setProperty("avatar", avatar_path)
 
-        # 更新数量
+        self.content_layout.addWidget(item)
+
         self.count += 1
         self.update_title()
-
     # ===== 🔥 更新标题（只更新右边）=====
     def update_title(self):
         self.count_label.setText(str(self.count))
 
+    def set_added(self, friend_id):
+        for i in range(self.content_layout.count()):
+            item = self.content_layout.itemAt(i).widget()
+            if not item:
+                continue
+
+            if item.property("friend_id") == friend_id:
+                btn = item.findChild(QPushButton)
+                if btn:
+                    btn.setText("已添加")
+                    btn.setEnabled(False)
     # ===== 展开/收起 =====
     def toggle(self):
         self.is_expanded = not self.is_expanded
@@ -156,3 +224,30 @@ class GroupWidget(QWidget):
 
         self.anim.start()
         self.arrow_anim.start()
+
+    def get_round_pixmap(self, path, size=32):
+        src = QPixmap(path)
+
+        if src.isNull():
+            return QPixmap()
+
+        src = src.scaled(
+            size, size,
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation
+        )
+
+        result = QPixmap(size, size)
+        result.fill(Qt.transparent)
+
+        painter = QPainter(result)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        path_circle = QPainterPath()
+        path_circle.addEllipse(QRectF(0, 0, size, size))
+        painter.setClipPath(path_circle)
+
+        painter.drawPixmap(0, 0, src)
+        painter.end()
+
+        return result

@@ -38,7 +38,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #EEF2F6;</string>
+      <string notr="true">background-color: #ECF3FA;</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -76,7 +76,7 @@
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: #F5F9FC;</string>
+         <string notr="true">background-color: #FFFFFF;</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <property name="topMargin">
@@ -123,8 +123,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="go.qrc">
-             <normaloff>:/new/prefix2/go.png</normaloff>:/new/prefix2/go.png</iconset>
+            <iconset resource="pic.qrc">
+             <normaloff>:/new/prefix1/go.png</normaloff>:/new/prefix1/go.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -409,7 +409,7 @@ border: 1px solid #E0E0E0;</string>
   </layout>
  </widget>
  <resources>
-  <include location="go.qrc"/>
+  <include location="pic.qrc"/>
  </resources>
  <connections/>
 </ui>

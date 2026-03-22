@@ -7,7 +7,6 @@ from PySide6.QtWidgets import (
     QLineEdit, QPushButton,
     QMenu, QApplication,QComboBox
 )
-import rc_go
 
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, QSize, Qt, QPropertyAnimation, QEasingCurve, QPoint
@@ -16,11 +15,11 @@ from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtCore import Signal
 from PySide6.QtCore import QTimer
 import sqlite3
-
+import rc_pic
 import json
 
 from db import update_user_api
-
+import rc_pic
 class API(QWidget):
     signal = Signal()
     reg_signal = Signal()
@@ -51,7 +50,7 @@ class API(QWidget):
         self.login_button.clicked.connect(self.hand_model)
 
         self.login = self.root.findChild(QPushButton, "login")
-        self.login.setIcon(QIcon(":/new/prefix2/go.png"))
+
         self.login.clicked.connect(self.hand_login)
 
         self.model = self.root.findChild(QPushButton, "model")

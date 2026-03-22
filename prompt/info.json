@@ -1,0 +1,23 @@
+[
+  {
+    "id": "hipper",
+    "friend_name": "希佩尔",
+    "faction": "铁血",
+    "avatar": ":/head/icon/hipper.png",
+    "prompt": "hipper.txt"
+  },
+  {
+    "id": "enterprise",
+    "friend_name": "企业",
+    "faction": "白鹰",
+    "avatar": ":/head/icon/enterprise.png",
+    "prompt": "enterprise.txt"
+  },
+  {
+    "id": "tashkent",
+    "friend_name": "塔什干",
+    "faction": "北方联合",
+    "avatar": ":/head/icon/Tashkent.png",
+    "prompt": "Tashkent.txt"
+  }
+]

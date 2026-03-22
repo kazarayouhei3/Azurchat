@@ -1,10 +1,7 @@
 import os
 from PySide6.QtWidgets import (
     QWidget, QToolButton, QLabel,
-    QHBoxLayout, QListWidget,
-    QListWidgetItem, QSizePolicy,
     QLineEdit, QPushButton,
-    QMenu
 )
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, QSize, Qt, QPropertyAnimation, QEasingCurve, QPoint
@@ -14,8 +11,9 @@ from PySide6.QtCore import Signal
 
 import threading
 from PySide6.QtCore import QTimer
-
+import rc_pic
 from db import register_user
+
 class Reg(QWidget):
     signal = Signal()
     b_signal = Signal()

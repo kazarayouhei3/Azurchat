@@ -35,7 +35,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #EEF2F6;</string>
+      <string notr="true">background-color: #ECF3FA;</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -123,7 +123,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="pic.qrc">
              <normaloff>:/new/prefix1/go.png</normaloff>:/new/prefix1/go.png</iconset>
            </property>
           </widget>
@@ -140,8 +140,7 @@
             </font>
            </property>
            <property name="styleSheet">
-            <string notr="true">
-</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string/>
@@ -262,6 +261,9 @@ border: 1px solid #E0E0E0;</string>
                 <width>30</width>
                 <height>30</height>
                </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
               <property name="styleSheet">
                <string notr="true">border: 0px;</string>

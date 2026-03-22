@@ -24,7 +24,7 @@ from PySide6.QtCore import QUrl, Qt
 from db import check_user, check_api
 
 class Login(QWidget):
-    signal = Signal()
+    signal = Signal(str)
     reg_signal = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -136,7 +136,7 @@ class Login(QWidget):
 
             if api_ok:
                 Toast("登录成功", self)
-                self.signal.emit()
+                self.signal.emit(username)
             else:
                 self.open_api_dialog(username)
 
