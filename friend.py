@@ -2,16 +2,19 @@ import os
 
 from PySide6.QtGui import QPixmap, QPainterPath, QPainter
 from PySide6.QtWidgets import (
-    QWidget, QPushButton, QToolButton, QVBoxLayout, QHBoxLayout, QLabel
+    QWidget, QPushButton, QToolButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
 )
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, Qt, QRectF
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QFile, Qt, QRectF, Signal
+
+from qap import get_round_pixmap
+
 
 class Friend(QWidget):
-    signal = Signal()
-    a_signal = Signal()
-    b_signal = Signal()
+    signal = Signal()      # 左上角返回
+    a_signal = Signal()    # 确认
+    b_signal = Signal()    # 取消
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -24,32 +27,38 @@ class Friend(QWidget):
         self.root = loader.load(file)
         file.close()
         self.root.setParent(self)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(self.root)
+
         self.quit_button = self.root.findChild(QToolButton, "quit_button")
-        self.quit_button.clicked.connect(self.signal.emit)
         self.enter_button = self.root.findChild(QPushButton, "enter")
-        self.enter_button.clicked.connect(self.a_signal.emit)
         self.quit = self.root.findChild(QPushButton, "quit")
+        self.name_edit = self.root.findChild(QLineEdit, "name")
+        self.line = self.root.findChild(QLineEdit, "line")
+        self.quit_button.clicked.connect(self.signal.emit)
+        self.enter_button.clicked.connect(self.a_signal.emit)
         self.quit.clicked.connect(self.b_signal.emit)
 
         self.container = self.root.findChild(QWidget, "friend_a")
 
-        # 如果 UI 里没 layout，就手动加
-        self.layout = QVBoxLayout(self.container)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(5)
+        if self.container.layout():
+            self.layout = self.container.layout()
+        else:
+            self.layout = QVBoxLayout(self.container)
+            self.layout.setContentsMargins(0, 0, 0, 0)
+            self.layout.setSpacing(5)
 
-        # ===== 信息行（头像 + 名字）=====
         self.info_widget = QWidget()
         info_layout = QHBoxLayout(self.info_widget)
         info_layout.setContentsMargins(20, 20, 20, 20)
         info_layout.setSpacing(10)
 
-        # ===== 头像 =====
         self.avatar_label = QLabel()
         self.avatar_label.setFixedSize(60, 60)
         self.avatar_label.setStyleSheet("border-radius:30px; background:#ddd;")
 
-        # ===== 名字 =====
         self.name_label = QLabel()
         self.name_label.setStyleSheet("font-size:16px; font-weight:bold;")
 
@@ -57,41 +66,32 @@ class Friend(QWidget):
         info_layout.addWidget(self.name_label)
         info_layout.addStretch()
 
-        # ⭐ 加到 friend_a 里
         self.layout.addWidget(self.info_widget)
 
-    def get_round_pixmap(self, path, size=60):
-        src = QPixmap(path)
-
-        if src.isNull():
-            return QPixmap()
-
-        # 等比例裁剪填充
-        src = src.scaled(
-            size, size,
-            Qt.KeepAspectRatioByExpanding,
-            Qt.SmoothTransformation
-        )
-
-        result = QPixmap(size, size)
-        result.fill(Qt.transparent)
-
-        painter = QPainter(result)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        path_circle = QPainterPath()
-        path_circle.addEllipse(QRectF(0, 0, size, size))
-        painter.setClipPath(path_circle)
-
-        painter.drawPixmap(0, 0, src)
-        painter.end()
-
-        return result
 
     def set_user_info(self, name, avatar):
         self.name_label.setText(name)
 
-        pix = self.get_round_pixmap(avatar, 60)
-
+        pix = get_round_pixmap(avatar, 60)
         if not pix.isNull():
             self.avatar_label.setPixmap(pix)
+        else:
+            self.avatar_label.clear()
+
+
+        self.name_edit.clear()
+        self.name_edit.setPlaceholderText(name)
+
+    def get_input_name(self):
+        return self.name_edit.text().strip()
+
+    def get_verify_msg(self):
+
+        return self.line.text().strip()
+
+    def reset(self):
+        if self.name_edit:
+            self.name_edit.clear()
+
+        if self.line:
+            self.line.clear()

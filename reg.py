@@ -4,15 +4,17 @@ from PySide6.QtWidgets import (
     QLineEdit, QPushButton,
 )
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QSize, Qt, QPropertyAnimation, QEasingCurve, QPoint
-from PySide6.QtWidgets import QGraphicsOpacityEffect
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import QFile, QSize, Qt
+
+from PySide6.QtGui import QIcon
 from PySide6.QtCore import Signal
 
 import threading
 from PySide6.QtCore import QTimer
 import rc_pic
 from db import register_user
+from qap import Toast
+
 
 class Reg(QWidget):
     signal = Signal()
@@ -79,47 +81,3 @@ class Reg(QWidget):
         self.password.clear()
 
 
-
-class Toast(QLabel):
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
-
-        self.setStyleSheet("""
-            QLabel {
-                background-color: rgba(0, 0, 0, 180);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-            }
-        """)
-
-        self.adjustSize()
-        self.move(
-            (parent.width() - self.width()) // 2,
-            parent.height() // 3
-        )
-
-        self.setGraphicsEffect(QGraphicsOpacityEffect(self))
-        self.opacity_effect = self.graphicsEffect()
-
-        self.animation = QPropertyAnimation(self.opacity_effect, b"opacity")
-        self.animation.setDuration(300)
-        self.animation.setStartValue(0)
-        self.animation.setEndValue(1)
-        self.animation.setEasingCurve(QEasingCurve.OutCubic)
-
-        self.show()
-        self.animation.start()
-
-        # 1.5 秒后开始淡出
-        QTimer.singleShot(1500, self.fade_out)
-
-    def fade_out(self):
-        self.animation = QPropertyAnimation(self.opacity_effect, b"opacity")
-        self.animation.setDuration(500)
-        self.animation.setStartValue(1)
-        self.animation.setEndValue(0)
-        self.animation.setEasingCurve(QEasingCurve.OutCubic)
-        self.animation.finished.connect(self.close)
-        self.animation.start()

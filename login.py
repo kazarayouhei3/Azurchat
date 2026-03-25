@@ -1,8 +1,6 @@
 import os
 from PySide6.QtWidgets import (
     QWidget, QToolButton, QLabel,
-    QHBoxLayout, QListWidget,
-    QListWidgetItem, QSizePolicy,
     QLineEdit, QPushButton,
     QMenu, QApplication
 )
@@ -10,22 +8,20 @@ from PySide6.QtWidgets import (
 from api_dialog import API
 
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QPropertyAnimation, QEasingCurve
-from PySide6.QtWidgets import QGraphicsOpacityEffect, QMessageBox, QGraphicsBlurEffect
+from PySide6.QtCore import QFile
+from PySide6.QtWidgets import QMessageBox, QGraphicsBlurEffect
 from PySide6.QtCore import Signal
 
 from PySide6.QtCore import QTimer
-import json
-
-import sqlite3
-
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl, Qt
 from db import check_user, check_api
+from qap import Toast
+from reg import Reg
+from PySide6.QtWidgets import QStackedLayout
 
 class Login(QWidget):
     signal = Signal(str)
-    reg_signal = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -42,6 +38,16 @@ class Login(QWidget):
         # 把 UI 根挂到当前页面
         self.root.setParent(self)
 
+        # ===== ⭐ 创建注册页 =====
+        self.reg_page = Reg()
+
+        # ===== ⭐ 页面栈 =====
+        self.stack = QStackedLayout(self)
+        self.stack.addWidget(self.root)  # login页面
+        self.stack.addWidget(self.reg_page)  # reg页面
+
+        self.setLayout(self.stack)
+
         self.user = self.root.findChild(QLineEdit, "user")
         self.password = self.root.findChild(QLineEdit, "password")
 
@@ -54,8 +60,15 @@ class Login(QWidget):
 
         self.reg = self.root.findChild(QPushButton, "reg")
         self.reg.setCursor(Qt.PointingHandCursor)
-        self.reg.clicked.connect(self.reg_signal.emit)
-
+        self.reg.clicked.connect(
+            lambda: self.stack.setCurrentWidget(self.reg_page)
+        )
+        self.reg_page.b_signal.connect(
+            lambda: self.stack.setCurrentWidget(self.root)
+        )
+        self.reg_page.signal.connect(
+            lambda: self.stack.setCurrentWidget(self.root)
+        )
 
         self.que = self.root.findChild(QPushButton, "que")
         self.que.setCursor(Qt.PointingHandCursor)
@@ -170,47 +183,3 @@ class Login(QWidget):
         self.root.setGraphicsEffect(None)
 
         self.api.close()
-
-class Toast(QLabel):
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
-
-        self.setStyleSheet("""
-            QLabel {
-                background-color: rgba(0, 0, 0, 180);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-            }
-        """)
-
-        self.adjustSize()
-        self.move(
-            (parent.width() - self.width()) // 2,
-            parent.height() // 3
-        )
-
-        self.setGraphicsEffect(QGraphicsOpacityEffect(self))
-        self.opacity_effect = self.graphicsEffect()
-
-        self.animation = QPropertyAnimation(self.opacity_effect, b"opacity")
-        self.animation.setDuration(300)
-        self.animation.setStartValue(0)
-        self.animation.setEndValue(1)
-        self.animation.setEasingCurve(QEasingCurve.OutCubic)
-
-        self.show()
-        self.animation.start()
-
-        # 1.5 秒后开始淡出
-        QTimer.singleShot(1500, self.fade_out)
-
-    def fade_out(self):
-        self.animation = QPropertyAnimation(self.opacity_effect, b"opacity")
-        self.animation.setDuration(500)
-        self.animation.setStartValue(1)
-        self.animation.setEndValue(0)
-        self.animation.setEasingCurve(QEasingCurve.OutCubic)
-        self.animation.finished.connect(self.close)
-        self.animation.start()

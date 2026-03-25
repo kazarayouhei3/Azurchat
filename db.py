@@ -1,6 +1,6 @@
 import sqlite3
 
-import datetime
+from datetime import datetime
 import json
 from collections import defaultdict
 
@@ -23,40 +23,27 @@ def init_db():
 
     # ===== friends（好友表）=====
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS friends (
-    id TEXT NOT NULL,              -- ⭐ hipper
-    username TEXT NOT NULL,        -- ⭐ userA
-    friend_name TEXT NOT NULL,
+    CREATE TABLE  IF NOT EXISTS friends (
+    id TEXT,
+    username TEXT,
+    friend_name TEXT,   -- 原始名字（角色名）
+    nickname TEXT,      -- ⭐ 用户自定义昵称
     avatar TEXT,
-    PRIMARY KEY (username, id)     -- ⭐ 关键！！
-        )
+    PRIMARY KEY (username, id)
+)
     """)
 
     # ===== conversations（聊天列表）=====
     cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS conversations
-                   (
-                       id
-                       INTEGER
-                       PRIMARY
-                       KEY
-                       AUTOINCREMENT,
-                       username
-                       TEXT
-                       NOT
-                       NULL,
-                       friend_id
-                       TEXT,
-                       friend_name
-                       TEXT
-                       NOT
-                       NULL,
-                       avatar
-                       TEXT,
-                       last_message
-                       TEXT,
-                       last_time
-                       DATETIME
+    CREATE TABLE  IF NOT EXISTS  conversations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    friend_id TEXT,
+    friend_name TEXT,   -- 原始名字
+    nickname TEXT,      -- ⭐ 昵称
+    avatar TEXT,
+    last_message TEXT,
+    last_time DATETIME
                    )
                    """)
     # ⭐ 防止重复会话（非常关键）
@@ -209,27 +196,80 @@ def get_conversations_with_avatar(username):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT c.friend_name, c.last_message, c.last_time, f.avatar
+    SELECT 
+        c.friend_id,
+        c.friend_name,
+        c.nickname,
+        c.last_message,
+        c.last_time,
+        f.avatar,
+        a.prompt   -- ⭐新增
     FROM conversations c
     LEFT JOIN friends f
-      ON c.friend_name = f.friend_name
+      ON c.friend_id = f.id
      AND c.username = f.username
+    LEFT JOIN all_friends a
+      ON c.friend_id = a.id   -- ⭐用id关联（关键）
     WHERE c.username = ?
     ORDER BY c.last_time DESC
     """, (username,))
 
     data = cursor.fetchall()
     conn.close()
+
+    result = []
+
+    for fid, friend_name, nickname, last_msg, last_time, avatar, prompt in data:
+        display_name = nickname if nickname else friend_name
+
+        result.append({
+            "id": fid,
+            "name": display_name,
+            "last_message": last_msg,
+            "last_time": last_time,
+            "avatar": avatar,
+            "prompt": prompt or ""   # ⭐新增
+        })
+
+    return result
+
+def get_messages_by_fid(fid):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT sender, content, time
+    FROM messages
+    WHERE conv_id = ?
+    ORDER BY time ASC
+    """, (fid,))
+
+    data = cursor.fetchall()
+    conn.close()
     return data
 
-def get_conv_id(username, friend_name):
+def get_prompt_by_id(friend_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT prompt FROM all_friends
+    WHERE id = ?
+    """, (friend_id,))
+
+    result = cursor.fetchone()
+    conn.close()
+
+    return result[0] if result else ""
+
+def get_conv_id(username, friend_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT id FROM conversations
-    WHERE username = ? AND friend_name = ?
-    """, (username, friend_name))
+    WHERE username = ? AND friend_id = ?
+    """, (username, friend_id))
 
     result = cursor.fetchone()
     conn.close()
@@ -309,7 +349,7 @@ def load_all_friends_from_json(json_path="prompt/info.json"):
 
     conn.commit()
     conn.close()
-def get_groups_with_roles(db_path="chat.db"):
+def get_groups(db_path="chat.db"):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -339,12 +379,13 @@ def get_groups_with_roles(db_path="chat.db"):
         })
 
     return result
+
 def get_friends_list(username):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT friend_name, avatar, id
+    SELECT friend_name, nickname, avatar, id
     FROM friends
     WHERE username = ?
     """, (username,))
@@ -354,10 +395,13 @@ def get_friends_list(username):
 
     result = []
 
-    for name, avatar, fid in data:
+    for friend_name, nickname, avatar, fid in data:
+        # ⭐核心：优先用昵称
+        display_name = nickname if nickname else friend_name
+
         result.append({
             "id": fid,
-            "name": name,
+            "name": display_name,   # ⭐UI显示用这个
             "avatar": avatar
         })
 
@@ -378,7 +422,7 @@ def is_friend(username, friend_id):
     return result is not None
 
 
-def add_friend(username, friend_id, friend_name, avatar=None):
+def add_friend(username, friend_id, friend_name, nickname, avatar=None):
     conn = get_conn()
     cursor = conn.cursor()
 
@@ -392,22 +436,37 @@ def add_friend(username, friend_id, friend_name, avatar=None):
         return False
 
     cursor.execute("""
-        INSERT INTO friends (id, username, friend_name, avatar)
-        VALUES (?, ?, ?, ?)
-    """, (friend_id, username, friend_name, avatar))
+        INSERT INTO friends (id, username, friend_name, nickname, avatar)
+        VALUES (?, ?, ?, ?, ?)
+    """, (friend_id, username, friend_name, nickname, avatar))
 
     conn.commit()
     conn.close()
     return True
 
-def add_conversation(username, friend_id, friend_name, avatar=None):
+def update_conversation_last(username, friend_id, last_message):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cursor.execute("""
+    UPDATE conversations
+    SET last_message = ?, last_time = ?
+    WHERE username = ? AND friend_id = ?
+    """, (last_message, now, username, friend_id))
+
+    conn.commit()
+    conn.close()
+
+def add_conversation(username, friend_id, friend_name, nickname, avatar=None):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT 1 FROM conversations
-        WHERE username=? AND friend_name=?
-    """, (username, friend_name))
+        WHERE username=? AND friend_id=?
+    """, (username, friend_id))
 
     if cursor.fetchone():
         conn.close()
@@ -415,26 +474,11 @@ def add_conversation(username, friend_id, friend_name, avatar=None):
 
     cursor.execute("""
         INSERT INTO conversations (
-            username, friend_id, friend_name, avatar, last_message, last_time
+            username, friend_id, friend_name, nickname, avatar, last_message, last_time
         )
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    """, (username, friend_id, friend_name, avatar, ""))
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    """, (username, friend_id, friend_name, nickname, avatar, ""))
 
     conn.commit()
     conn.close()
     return True
-
-def get_conversations(username):
-    conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT friend_name, last_message, last_time, avatar
-        FROM conversations
-        WHERE username=?
-        ORDER BY last_time DESC
-    """, (username,))
-
-    rows = cursor.fetchall()
-    conn.close()
-    return rows

@@ -17,19 +17,11 @@ def resource_path(*paths):
     return os.path.join(get_base_path(), *paths)
 
 
-# ⭐ 角色映射（中文 → prompt文件名）
-ROLE_MAP = {
-    "希佩尔": "hipper",
-    "企业": "enterprise",
-    "塔什干": "tashkent"
-}
-
-
 class Chat:
 
-    def __init__(self, role="hipper"):
-        # ⭐ 统一角色（防中文路径问题）
-        self.role = ROLE_MAP.get(role, role)
+    def __init__(self, prompt="hipper"):
+
+        self.prompt = prompt
 
         # ===== 用户配置 =====
         self.username, self.model = self.load_username()
@@ -46,7 +38,7 @@ class Chat:
         )
 
         # ===== 加载 persona =====
-        persona_file = resource_path(f"prompt/{self.role}.txt")
+        persona_file = resource_path(f"prompt/{self.prompt}")
 
         if not os.path.exists(persona_file):
             raise Exception(f"找不到角色 prompt 文件: {persona_file}")

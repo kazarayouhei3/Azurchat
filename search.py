@@ -1,9 +1,16 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QHBoxLayout,
-    QPushButton
+    QPushButton, QScrollArea
 )
-from PySide6.QtCore import Qt, QPoint, Signal
-from PySide6.QtGui import QPainter, QPolygon, QColor, QPixmap
+from PySide6.QtCore import Qt, Signal, QPoint
+from PySide6.QtGui import QPixmap, QPainter, QColor, QPolygon
+
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QHBoxLayout,
+    QPushButton, QScrollArea
+)
+from PySide6.QtCore import Qt, Signal, QPoint
+from PySide6.QtGui import QPixmap, QPainter, QColor, QPolygon
 
 
 class Suggest(QWidget):
@@ -12,143 +19,134 @@ class Suggest(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # ⭐ 不抢焦点
+        # ===== 核心：稳定弹窗 =====
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
-        self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        # ===== 外层布局（给三角留空间）=====
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 10, 0, 0)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
 
-        # ===== 白卡片 =====
-        self.content = QWidget()
-        self.content.setObjectName("content")
-        self.content.setStyleSheet("""
-        #content {
-            background: white;
-            border-radius: 8px;
-        }
+        self.max_items = 5
+        self.item_height = 50
+
+        # ===== 主布局 =====
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 12, 0, 0)  # 给三角留空间
+
+        # ===== 卡片 =====
+        self.card = QWidget()
+        self.card.setStyleSheet("""
+            QWidget {
+                background: white;
+                border-radius: 10px;
+            }
         """)
+        self.main_layout.addWidget(self.card)
 
-        outer.addWidget(self.content)
+        # ===== scroll =====
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QScrollArea.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        # ===== 内容布局 =====
-        self.layout = QVBoxLayout(self.content)
-        self.layout.setContentsMargins(10, 20, 10, 10)
-        self.layout.setSpacing(4)
+        self.inner = QWidget()
+        self.layout = QVBoxLayout(self.inner)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(2)
+
+        self.scroll.setWidget(self.inner)
+
+        card_layout = QVBoxLayout(self.card)
+        card_layout.setContentsMargins(0, 0, 0, 0)
+        card_layout.addWidget(self.scroll)
 
         self.items = []
 
     # ===== 数据 =====
     def set_data(self, data):
-        # 清空旧
+        # 清空
         for i in self.items:
             i.deleteLater()
         self.items.clear()
 
+        # 添加
         for item in data:
-            w = QWidget()
-            w.setObjectName("item")
-
-            h = QHBoxLayout(w)
-            h.setContentsMargins(10, 6, 10, 6)
-
-            # ===== 头像 =====
-            avatar = QLabel()
-            avatar.setFixedSize(32, 32)
-
-            pix = QPixmap(item["avatar"])
-            if not pix.isNull():
-                pix = pix.scaled(
-                    32, 32,
-                    Qt.KeepAspectRatioByExpanding,
-                    Qt.SmoothTransformation
-                )
-                avatar.setPixmap(pix)
-
-            h.addWidget(avatar)
-
-            # ===== 名字 =====
-            name = QLabel(item["name"])
-            name.setStyleSheet("font-size:14px; font-weight:600;")
-            h.addWidget(name)
-
-            h.addStretch()
-
-            # ===== 按钮 =====
-            btn = QPushButton()
-            btn.setFixedHeight(26)
-
-            # ⭐ 判断是否已添加
-            if item.get("added"):
-                self.set_added_style(btn)
-            else:
-                self.set_add_style(btn)
-
-            # ⭐ 点击
-            btn.clicked.connect(
-                lambda _, b=btn, n=item["name"]: self.on_add(b, n)
-            )
-            btn.setAttribute(Qt.WA_NoMousePropagation)
-
-            h.addWidget(btn)
-
-            # ===== hover =====
-            w.setStyleSheet("""
-                #item:hover {
-                    background:#F5F7FA;
-                    border-radius:6px;
-                }
-            """)
-
-            # 点击整行
-            def make_click(name):
-                return lambda e: self.selected.emit(name)
-
-            w.mousePressEvent = make_click(item["name"])
-
+            w = self.create_item(item)
             self.layout.addWidget(w)
             self.items.append(w)
 
-    # ===== 按钮：未添加 =====
-    def set_add_style(self, btn):
-        btn.setText("添加")
-        btn.setEnabled(True)
-        btn.setStyleSheet("""
-            QPushButton {
-                background:#409EFF;
-                color:white;
-                border:none;
-                border-radius:13px;
-                padding:0 10px;
-            }
-            QPushButton:hover {
-                background:#66b1ff;
-            }
-        """)
+        # ⭐ 核心：固定高度（别用adjustSize）
+        count = min(len(data), self.max_items)
+        total_height = count * self.item_height
 
-    # ===== 按钮：已添加 =====
-    def set_added_style(self, btn):
-        btn.setText("已添加")
-        btn.setEnabled(False)
-        btn.setStyleSheet("""
-            QPushButton {
-                background:#E4E7ED;
-                color:#909399;
-                border:none;
-                border-radius:13px;
-                padding:0 10px;
+        self.scroll.setFixedHeight(total_height)
+        self.setFixedHeight(total_height + 12)  # +三角
+
+    # ===== 单项 =====
+    def create_item(self, item):
+        w = QWidget()
+        w.setFixedHeight(self.item_height)
+        w.setStyleSheet("""
+            QWidget:hover {
+                background:#F5F7FA;
+                border-radius:6px;
             }
         """)
 
-    # ===== 点击添加 =====
-    def on_add(self, btn, name):
-        # ⭐ UI立即变化
-        self.set_added_style(btn)
+        h = QHBoxLayout(w)
+        h.setContentsMargins(10, 6, 10, 6)
 
-        # ⭐ 发信号（外部写数据库）
-        self.selected.emit(name)
+        avatar = QLabel()
+        avatar.setFixedSize(32, 32)
+
+        pix = QPixmap(item["avatar"])
+        if not pix.isNull():
+            avatar.setPixmap(pix.scaled(32, 32, Qt.KeepAspectRatioByExpanding))
+
+        h.addWidget(avatar)
+
+        name = QLabel(item["name"])
+        name.setStyleSheet("font-size:14px;")
+        h.addWidget(name)
+
+        h.addStretch()
+
+        btn = QPushButton("添加")
+        btn.setFixedSize(60, 26)
+
+        if item.get("added"):
+            btn.setText("已添加")
+            btn.setEnabled(False)
+            btn.setStyleSheet("""
+                QPushButton {
+                    background:#E4E7ED;
+                    color:#909399;
+                    border:none;
+                    border-radius:13px;
+                }
+            """)
+        else:
+            btn.setStyleSheet("""
+                QPushButton {
+                    background:#409EFF;
+                    color:white;
+                    border:none;
+                    border-radius:13px;
+                }
+                QPushButton:hover {
+                    background:#66b1ff;
+                }
+            """)
+
+        btn.clicked.connect(lambda _, fid=item["id"]: self.select(fid))
+        h.addWidget(btn)
+
+        w.mousePressEvent = lambda e, fid=item["id"]: self.select(fid)
+
+        return w
+
+    def select(self, fid):
+        self.selected.emit(fid)
+        self.hide()
 
     # ===== 三角 =====
     def paintEvent(self, event):
@@ -158,11 +156,10 @@ class Suggest(QWidget):
         painter.setBrush(QColor(255, 255, 255))
         painter.setPen(Qt.NoPen)
 
-        # ⭐ 只画三角（不要再画矩形，避免叠加）
         triangle = QPolygon([
             QPoint(30, 0),
-            QPoint(40, 10),
-            QPoint(20, 10),
+            QPoint(40, 12),
+            QPoint(20, 12),
         ])
 
         painter.drawPolygon(triangle)

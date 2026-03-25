@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Signal
 
-from db import get_groups_with_roles, add_friend, is_friend
+from db import add_friend, is_friend, get_groups
 from fr_widget import GroupWidget
 from search import Suggest
 
@@ -59,7 +59,7 @@ class Add_Friend(QWidget):
         self.scroll.setWidget(self.inner)
 
         # ===== 数据 =====
-        data = get_groups_with_roles()
+        data = get_groups()
         self.groups = []
 
         for group in data:
@@ -87,7 +87,8 @@ class Add_Friend(QWidget):
         self.layout.addStretch()
 
         # ===== Suggest =====
-        self.popup = Suggest()
+        self.popup = Suggest(self)
+        self.popup.setFixedWidth(self.search.width() - 20)
         self.popup.selected.connect(self.on_add_friend)
 
         self.search.textChanged.connect(self.show_suggest)
@@ -124,12 +125,18 @@ class Add_Friend(QWidget):
             self.popup.hide()
             return
 
-        self.popup.set_data(result[:5])
+        self.popup.set_data(result[:10])
+        self.popup.setFixedWidth(self.search.width())
 
         pos = self.search.mapToGlobal(self.search.rect().bottomLeft())
-        self.popup.move(pos)
+
+        self.popup.move(pos.x(), pos.y() + 6)
+        self.popup.setFixedWidth(self.search.width())
 
         self.popup.show()
+        self.popup.raise_()
+
+        self.search.setFocus()
     # ===== 更新列表 UI =====
     def update_group_item(self, friend_id):
         for group in self.groups:
@@ -137,6 +144,10 @@ class Add_Friend(QWidget):
 
     # ===== 添加好友 =====
     def on_add_friend(self, friend_id):
+        # ⭐关键：如果已添加，直接不处理
+        if is_friend(self.username, friend_id):
+            return
+
         for group in self.groups:
             for i in range(group.content_layout.count()):
                 item = group.content_layout.itemAt(i).widget()

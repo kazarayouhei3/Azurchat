@@ -2,54 +2,29 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9a5c876-8464-4164-bd87-1012080d991c" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/add_friend.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/friend.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/friend_item.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/icon/search.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prompt/info.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/qap.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources/9c39d5b6-5591-465d-afdb-42e98011aac7.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9c39d5b6-5591-465d-afdb-42e98011aac7.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/data_source_mapping.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/add_friend.py" beforeDir="false" afterPath="$PROJECT_DIR$/add_friend.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api_dialog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api_dialog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_dialog.ui" beforeDir="false" afterPath="$PROJECT_DIR$/api_dialog.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chara.py" beforeDir="false" afterPath="$PROJECT_DIR$/chara.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chat.db" beforeDir="false" afterPath="$PROJECT_DIR$/chat.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_info.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/form.ui" beforeDir="false" afterPath="$PROJECT_DIR$/form.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/form_chara.ui" beforeDir="false" afterPath="$PROJECT_DIR$/form_chara.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/form_chat.ui" beforeDir="false" afterPath="$PROJECT_DIR$/form_chat.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/form_info.ui" beforeDir="false" afterPath="$PROJECT_DIR$/form_info.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fr.ui" beforeDir="false" afterPath="$PROJECT_DIR$/fr.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fr_widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/fr_widget.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.qrc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/head.qrc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/click-2.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click-2.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/click.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/click.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/friend.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/friend.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/my.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/my.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/my_select.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/my_select.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/phone.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/phone.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/phone_select.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/phone_select.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/quit.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/quit.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/talk.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/talk.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/icon/talk_select.svg" beforeDir="false" afterPath="$PROJECT_DIR$/icon/talk_select.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friend.py" beforeDir="false" afterPath="$PROJECT_DIR$/friend.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/friend.ui" beforeDir="false" afterPath="$PROJECT_DIR$/friend.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/login.ui" beforeDir="false" afterPath="$PROJECT_DIR$/login.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pic.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/pic.qrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prompt/hipper.txt" beforeDir="false" afterPath="$PROJECT_DIR$/prompt/hipper.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rc_pic.py" beforeDir="false" afterPath="$PROJECT_DIR$/rc_pic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prompt/Tashkent.txt" beforeDir="false" afterPath="$PROJECT_DIR$/prompt/tashkent.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prompt/info.json" beforeDir="false" afterPath="$PROJECT_DIR$/prompt/info.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reg.py" beforeDir="false" afterPath="$PROJECT_DIR$/reg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reg.ui" beforeDir="false" afterPath="$PROJECT_DIR$/reg.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setting.ui" beforeDir="false" afterPath="$PROJECT_DIR$/setting.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setting.ui.autosave" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_form_chara.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_form_chat.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_form_info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_fr.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_login.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ui_reg.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/use_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/use_api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/widget.py" beforeDir="false" afterPath="$PROJECT_DIR$/widget.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -124,11 +99,25 @@
       <workItem from="1773893457574" duration="16836000" />
       <workItem from="1773999365115" duration="31209000" />
       <workItem from="1774156245211" duration="10011000" />
-      <workItem from="1774174662497" duration="2423000" />
+      <workItem from="1774174662497" duration="10318000" />
+      <workItem from="1774232972937" duration="22861000" />
+      <workItem from="1774348600138" duration="5669000" />
+      <workItem from="1774360975561" duration="2654000" />
+      <workItem from="1774433007534" duration="20128000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/db.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

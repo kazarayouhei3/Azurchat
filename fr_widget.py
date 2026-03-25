@@ -3,6 +3,9 @@ from PySide6.QtCore import Signal, Qt, QPropertyAnimation, QEasingCurve, Propert
 from PySide6.QtGui import QPixmap, QPainter, QTransform, QPainterPath
 from PySide6.QtSvg import QSvgRenderer
 
+from qap import get_round_pixmap
+
+
 class ArrowLabel(QLabel):
     def __init__(self):
         super().__init__()
@@ -120,7 +123,7 @@ class GroupWidget(QWidget):
         avatar = QLabel()
         avatar.setFixedSize(40, 40)
 
-        pix = self.get_round_pixmap(avatar_path, 40)
+        pix = get_round_pixmap(avatar_path, 40)
         if not pix.isNull():
             avatar.setPixmap(pix)
 
@@ -224,30 +227,3 @@ class GroupWidget(QWidget):
 
         self.anim.start()
         self.arrow_anim.start()
-
-    def get_round_pixmap(self, path, size=32):
-        src = QPixmap(path)
-
-        if src.isNull():
-            return QPixmap()
-
-        src = src.scaled(
-            size, size,
-            Qt.KeepAspectRatioByExpanding,
-            Qt.SmoothTransformation
-        )
-
-        result = QPixmap(size, size)
-        result.fill(Qt.transparent)
-
-        painter = QPainter(result)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        path_circle = QPainterPath()
-        path_circle.addEllipse(QRectF(0, 0, size, size))
-        painter.setClipPath(path_circle)
-
-        painter.drawPixmap(0, 0, src)
-        painter.end()
-
-        return result

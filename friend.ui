@@ -388,7 +388,7 @@ QPushButton:pressed {
                     </property>
                     <layout class="QGridLayout" name="gridLayout_9">
                      <item row="1" column="0">
-                      <widget class="QLineEdit" name="lineEdit">
+                      <widget class="QLineEdit" name="line">
                        <property name="styleSheet">
                         <string notr="true">QLineEdit{
     background-color: white;
@@ -428,7 +428,7 @@ border: 1px solid #E0E0E0;
                       </widget>
                      </item>
                      <item row="1" column="0">
-                      <widget class="QLineEdit" name="lineEdit_2">
+                      <widget class="QLineEdit" name="name">
                        <property name="styleSheet">
                         <string notr="true">    background-color: white;
     border-radius: 10px;

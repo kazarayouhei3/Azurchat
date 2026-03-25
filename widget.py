@@ -1,14 +1,13 @@
 # This Python file uses the following encoding: utf-8
 import sys
-from datetime import datetime
 
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QMenu, QToolButton,
+    QApplication, QWidget, QToolButton,
     QListWidgetItem, QStackedLayout, QSplashScreen
 )
 from PySide6.QtCore import QSize, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 
-from add_friend import Add_Friend
+
 from ui_form import Ui_Widget
 
 from chat_item import ChatItem
@@ -18,11 +17,9 @@ from chat_info import ChatCommand
 from PySide6.QtGui import QPixmap, QIcon
 from chara import Chara
 from login import Login
-from reg import Reg
 from fr import Fr
-from friend import Friend
-from db import init_db, get_conversations_with_avatar, load_all_friends_from_json, add_friend, add_conversation, \
-    get_conversations
+
+from db import init_db, get_conversations_with_avatar, load_all_friends_from_json, get_prompt_by_id
 
 
 class Widget(QWidget):
@@ -44,26 +41,19 @@ class Widget(QWidget):
         self.info = ChatCommand()
 
         self.login = Login()
-        self.friend = Friend()
+
         self.page_chat = None
-
-        self.reg = Reg()
         self.fr = Fr()
-
         self.stack = QStackedLayout(self)
         self.stack.setContentsMargins(0, 0, 0, 0)
         self.stack.addWidget(self.page_list)  # index 0
-
-
         self.setLayout(self.stack)
 
         self.page_chara = Chara()
         self.stack.addWidget(self.page_chara)  # index 2
         self.stack.addWidget(self.info)  # index 3
         self.stack.addWidget(self.login)  # index 4
-        self.stack.addWidget(self.reg)  # index 5
         self.stack.addWidget(self.fr)  # index 5
-        self.stack.addWidget(self.friend)  # index 5
 
         self.stack.setCurrentWidget(self.login)
 
@@ -72,26 +62,7 @@ class Widget(QWidget):
         self.login.signal.connect(self.after_login)
         self.login.signal.connect(self.after_login)
 
-        self.login.reg_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.reg)
-        )
-
-        self.reg.b_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.login)
-        )
-
-        self.reg.signal.connect(
-            lambda: self.stack.setCurrentWidget(self.login)
-        )
-        self.friend.signal.connect(
-            lambda: self.stack.setCurrentWidget(self.fr)
-        )
-        self.friend.a_signal.connect(self.confirm_add)
-        self.friend.b_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.fr)
-        )
-
-        self.fr.c_signal.connect(self.open_add_friend)
+        self.fr.add_success.connect(self.on_add_friend_success)
         # 点击会话进入聊天页
         self.ui.list.itemClicked.connect(self.open_chat_in_place)
 
@@ -99,17 +70,7 @@ class Widget(QWidget):
         self._anims = []
         self._play_index = 0
 
-        data = get_conversations(self.current_user)
-
         self._chat_data = []
-
-        for name, msg, time_text, avatar in data:
-            # 防止 None
-            msg = msg or ""
-            time_text = time_text or ""
-            avatar = avatar or ""
-
-            self._chat_data.append((name, msg, time_text, avatar))
 
         self.drag_bar = self.ui.AzurChat
         self.current_user = None
@@ -159,6 +120,14 @@ class Widget(QWidget):
         self.info.phone_signal.connect(
             lambda: self.stack.setCurrentWidget(self.fr)
         )
+        self._last_chat_ids = []
+        self.page_chara.back_button.clicked.connect(
+            lambda: self.stack.setCurrentWidget(self.page_chat)
+        )
+
+    def on_add_friend_success(self):
+        self.refresh_chat_list()
+        self.stack.setCurrentWidget(self.page_list)
 
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal
@@ -174,32 +143,6 @@ class Widget(QWidget):
             btn.setIcon(QIcon(icon_normal))
             btn.setIconSize(QSize(20, 20))
             btn.installEventFilter(self)
-
-    def open_confirm_page(self, friend_id, name, avatar):
-        self.pending_friend = (friend_id, name, avatar)
-        self.friend.set_user_info(name, avatar)
-        # 👉 切换到确认页
-        self.stack.setCurrentWidget(self.friend)
-
-    def confirm_add(self):
-        fid, name, avatar = self.pending_friend
-
-        success = add_friend(self.current_user, fid, name, avatar)
-
-        if success:
-            add_conversation(self.current_user, fid, name, avatar)
-
-        self.add_friend.update_group_item(fid)
-        self.fr.load_data(self.current_user)
-        self.stack.setCurrentWidget(self.fr)
-
-
-    def open_add_friend(self):
-        if not hasattr(self, "add_friend") or not self.add_friend:
-            print("还没登录，不能打开 add_friend")
-            return
-
-        self.stack.setCurrentWidget(self.add_friend)
 
     def eventFilter(self, obj, event):
 
@@ -238,10 +181,10 @@ class Widget(QWidget):
         if self._play_index >= len(self._chat_data):
             return
 
-        name, msg, time_text, avatar_path = self._chat_data[self._play_index]
+        fid, name, msg, time_text, avatar_path, prompt = self._chat_data[self._play_index]
         self._play_index += 1
 
-        item_widget = ChatItem(name, msg, time_text, avatar_path)
+        item_widget = ChatItem(fid, name, msg, time_text, avatar_path)
 
         item = QListWidgetItem(self.ui.list)
         item.setSizeHint(QSize(0, 64))
@@ -286,54 +229,106 @@ class Widget(QWidget):
 
     def after_login(self, username):
         self.current_user = username
-        self.fr.load_data(self.current_user)
-        self.add_friend = Add_Friend(username=self.current_user)
-        self.stack.addWidget(self.add_friend)
-        self.add_friend.add_request.connect(self.open_confirm_page)
+
+        self.load_chat_data(self.current_user)
+        self.fr.set_user(self.current_user)
 
         self.stack.setCurrentWidget(self.page_list)
 
-        self.add_friend.q_signal.connect(self.back_to_fr)
         if not self.page_chat:
             self.page_chat = ChatPage()
-
             self.stack.addWidget(self.page_chat)
 
             self.page_chat.bind_back(
-                lambda: self.stack.setCurrentWidget(self.page_list)
+                lambda: self.back_to_list_and_refresh()
             )
-
             self.page_chat.bind_open_chara(
-                lambda: self.stack.setCurrentWidget(self.page_chara)
+                lambda: self.open_chara_page()
             )
-
-        self.stack.setCurrentWidget(self.page_list)
         QTimer.singleShot(100, self.start_intro_anim)
 
+    def open_chara_page(self):
+        name = self.page_chat.current_name
+        avatar = self.page_chat.current_avatar
+
+        self.page_chara.set_chara_info(name, avatar)
+
+        self.stack.setCurrentWidget(self.page_chara)
+    def back_to_list_and_refresh(self):
+        self.refresh_chat_list()  # ⭐重新读数据库
+        self.stack.setCurrentWidget(self.page_list)
     def back_to_fr(self):
         self.fr.load_data(self.current_user)
         self.stack.setCurrentWidget(self.fr)
+
     # ===== 切换聊天页 =====
     def open_chat_in_place(self, item: QListWidgetItem):
         w = self.ui.list.itemWidget(item)
-        role = w.name_label.text() if w else "聊天"
 
-        # ⭐ 关键：传角色
-        self.page_chat.set_role(role)
+        if not w:
+            return
 
-        # 设置标题
-        self.page_chat.set_title(role)
+        fid = w.fid
 
-        # 切页面
+        name = w.name_label.text()
+        prompt = get_prompt_by_id(fid)
+        avatar = w.avatar
+
+        self.page_chat.set_chat(
+            self.current_user,  # ⭐传进去
+            fid,
+            name,
+            prompt,
+            avatar
+        )
+
         self.stack.setCurrentWidget(self.page_chat)
+
+    def render_static(self):
+        for fid, name, msg, time_text, avatar_path, prompt in self._chat_data:
+            item_widget = ChatItem(fid, name, msg, time_text, avatar_path)
+
+            item = QListWidgetItem(self.ui.list)
+            item.setSizeHint(QSize(0, 64))
+            self.ui.list.addItem(item)
+            self.ui.list.setItemWidget(item, item_widget)
+
+        self.ui.list.scrollToBottom()
 
     def load_chat_data(self, username):
         data = get_conversations_with_avatar(username)
 
         self._chat_data = [
-            (name, msg or "", t or "", avatar or "")
-            for name, msg, t, avatar in data
+            (
+                item["id"],
+                item["name"],
+                item["last_message"] or "",
+                item["last_time"] or "",
+                item["avatar"] or "",
+                item["prompt"] or ""  # ⭐加这个
+            )
+            for item in data
         ]
+
+    def refresh_chat_list(self):
+        self.ui.list.clear()
+
+        old_ids = self._last_chat_ids.copy()
+
+        self.load_chat_data(self.current_user)
+
+        new_ids = [item[0] for item in self._chat_data]  # fid列表
+
+        # ✅ 判断是否有新内容
+        has_new = new_ids != old_ids
+
+        self._last_chat_ids = new_ids
+
+        if has_new:
+            self.start_intro_anim()  # ✅ 只有变化才动画
+        else:
+            self.render_static()  # ✅ 否则直接渲染
+
 
     def bind_open_info(self, callback):
         tool_button = self.root.findChild(QToolButton, "menu")
@@ -341,6 +336,7 @@ class Widget(QWidget):
             tool_button.clicked.connect(callback)
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/new/prefix1/azur.ico"))
     # ===== 加载图 =====

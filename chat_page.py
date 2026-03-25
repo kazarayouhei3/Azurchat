@@ -6,10 +6,13 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, QSize, Qt, Signal, QTimer
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap, QPainter, QPainterPath
 
 import threading
 from datetime import datetime
+
+from db import get_messages_by_fid, insert_message, update_conversation_last, get_conv_id
+from qap import get_round_pixmap
 from use_api import Chat
 
 
@@ -19,7 +22,6 @@ class ChatPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.role = None
         self.chat_history = {}
         self.chat_engines = {}
         self.is_loading = False
@@ -53,6 +55,32 @@ class ChatPage(QWidget):
                     background-color: #EEF2F6;
                     padding: 10px;
                 }
+
+                QScrollBar:vertical {
+                    background: transparent;
+                    width: 8px;
+                    margin: 4px 2px 4px 0px;
+                }
+
+                QScrollBar::handle:vertical {
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 4px;
+                    min-height: 30px;
+                }
+
+                QScrollBar::handle:vertical:hover {
+                    background: rgba(0, 0, 0, 0.4);
+                }
+
+                QScrollBar::add-line:vertical,
+                QScrollBar::sub-line:vertical {
+                    height: 0px;
+                }
+
+                QScrollBar::add-page:vertical,
+                QScrollBar::sub-page:vertical {
+                    background: transparent;
+                }
             """)
 
         self.original_title = ""
@@ -68,25 +96,13 @@ class ChatPage(QWidget):
         self.ai_reply_signal.connect(self.show_reply)
 
     # =============================
-    # ⭐ 切换角色
-    # =============================
-    def set_role(self, role):
-        self.role = role
-
-        # 👉 复用Chat实例（保证上下文）
-        if role not in self.chat_engines:
-            self.chat_engines[role] = Chat(role)
-
-        self.chat_engine = self.chat_engines[role]
-
-        self.load_chat(role)
-        self.last_message_time = None
-
-    # =============================
     # 发送消息
     # =============================
     def send_message(self):
         if not self.chat_engine:
+            return None
+
+        if self.is_loading:  # ⭐⭐⭐关键防护⭐⭐⭐
             return
 
         text = self.input.text().strip()
@@ -95,68 +111,118 @@ class ChatPage(QWidget):
 
         self.input.clear()
 
-        self.add_right_message(text)
+        conv_id = get_conv_id(self.current_user, self.current_fid)
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        QTimer.singleShot(800, self.show_typing_in_title)
+        insert_message(conv_id, "user", text)
 
-        current_role = self.role
+        update_conversation_last(
+            username=self.current_user,
+            friend_id=self.current_fid,
+            last_message=text
+        )
+
+        self.add_right_message(text, now_str)
+
+        self.show_typing_in_title()
+
+        engine = self.chat_engine
+        current_fid = self.current_fid
 
         thread = threading.Thread(
             target=self.ask_ai,
-            args=(text, current_role),
+            args=(text, current_fid, engine),
             daemon=True
         )
         thread.start()
-
     # =============================
     # AI调用
     # =============================
-    def ask_ai(self, text, role):
+    def ask_ai(self, text, fid, engine):
         try:
-            reply = self.chat_engines[role].chat(text)
+            reply = engine.chat(text)
         except Exception as e:
             reply = f"请求失败：{str(e)}"
 
-        self.ai_reply_signal.emit((role, reply))
+        self.ai_reply_signal.emit((fid, reply))
 
     def show_reply(self, data):
-        role, reply = data
+        fid, reply = data
 
-        if role != self.role:
-            return
-
-        QTimer.singleShot(1500, lambda: self._final_reply(reply))
+        # ⭐⭐⭐关键3：不再延迟⭐⭐⭐
+        self._final_reply(reply)
 
     def _final_reply(self, reply):
         if self.title_label:
             self.title_label.setText(self.original_title)
 
-        self.add_left_message(reply)
+        conv_id = get_conv_id(self.current_user, self.current_fid)
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        insert_message(conv_id, "assistant", reply)
+
+        update_conversation_last(
+            username=self.current_user,
+            friend_id=self.current_fid,
+            last_message=reply
+        )
+
+        self.add_left_message(reply, now_str)
+
+    def set_chat(self, username, fid, name, prompt, avatar):
+        # ⭐ 当前用户 / 会话
+        self.current_user = username
+        self.current_name = name
+        self.current_fid = fid
+
+        # ⭐ 头像（你用QPixmap就保留）
+        self.current_avatar = QPixmap(avatar)
+
+        # ⭐ 设置标题
+        self.set_title(name)
+
+        # ⭐ 创建或复用聊天引擎
+        if fid not in self.chat_engines:
+            self.chat_engines[fid] = Chat(prompt)
+
+        self.chat_engine = self.chat_engines[fid]
+
+        # ⭐ 加载历史消息
+        self.load_chat(fid)
+
+        # ⭐ 重置时间（避免时间错乱）
+        self.last_message_time = None
+
 
     # =============================
     # 加载聊天记录
     # =============================
-    def load_chat(self, role):
+    def load_chat(self, fid):
         self.is_loading = True
         self.list.clear()
 
-        history = self.chat_history.get(role, [])
+        # ⭐拿到 conv_id（关键！！）
+        conv_id = get_conv_id(self.current_user, self.current_fid)
 
-        for msg_type, text in history:
-            if msg_type == "left":
-                self.add_left_message(text)
-            elif msg_type == "right":
-                self.add_right_message(text)
-            elif msg_type == "time":
-                self.add_time_label(text)
+        if not conv_id:
+            self.is_loading = False
+            return
+
+        messages = get_messages_by_fid(conv_id)
+
+        for sender, text, time_str in messages:
+            if sender == "user":
+                self.add_right_message(text, time_str)
+            else:
+                self.add_left_message(text, time_str)
 
         self.is_loading = False
 
     # =============================
     # 左气泡（AI）
     # =============================
-    def add_left_message(self, text):
-        self.check_and_add_time()
+    def add_left_message(self, text, time_str=None):
+        self.check_and_add_time(time_str)
 
         item = QListWidgetItem()
 
@@ -166,6 +232,17 @@ class ChatPage(QWidget):
         bubble.setStyleSheet("background:white; padding:8px; border-radius:10px;")
 
         layout = QHBoxLayout()
+
+        # ⭐ 头像
+        avatar_label = QLabel()
+        avatar_label.setFixedSize(36, 36)
+
+        pix = get_round_pixmap(self.current_avatar, 36)
+
+        if not pix.isNull():
+            avatar_label.setPixmap(pix)
+
+        layout.addWidget(avatar_label)
         layout.addWidget(bubble)
         layout.addStretch()
 
@@ -179,13 +256,13 @@ class ChatPage(QWidget):
         self.list.scrollToBottom()
 
         if not self.is_loading:
-            self.chat_history.setdefault(self.role, []).append(("left", text))
+            self.chat_history.setdefault(self.current_fid, []).append(("left", text))
 
     # =============================
     # 右气泡（用户）
     # =============================
-    def add_right_message(self, text):
-        self.check_and_add_time()
+    def add_right_message(self, text, time_str=None):
+        self.check_and_add_time(time_str)
 
         item = QListWidgetItem()
 
@@ -208,7 +285,7 @@ class ChatPage(QWidget):
         self.list.scrollToBottom()
 
         if not self.is_loading:
-            self.chat_history.setdefault(self.role, []).append(("right", text))
+            self.chat_history.setdefault(self.current_fid, []).append(("right", text))
 
     # =============================
     # 时间
@@ -223,19 +300,24 @@ class ChatPage(QWidget):
         item.setSizeHint(label.sizeHint())
 
         if not self.is_loading:
-            self.chat_history.setdefault(self.role, []).append(("time", text))
+            self.chat_history.setdefault(self.current_fid, []).append(("time", text))
 
-    def check_and_add_time(self):
-        now = datetime.now()
+    def check_and_add_time(self, time_str=None):
+        if time_str:
+            try:
+                msg_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                msg_time = datetime.now()
+        else:
+            msg_time = datetime.now()
 
         if not self.last_message_time:
-            self.add_time_label(now.strftime("%H:%M"))
+            self.add_time_label(msg_time.strftime("%H:%M"))
         else:
-            if (now - self.last_message_time).total_seconds() >= 60:
-                self.add_time_label(now.strftime("%H:%M"))
+            if (msg_time - self.last_message_time).total_seconds() >= 60:
+                self.add_time_label(msg_time.strftime("%H:%M"))
 
-        self.last_message_time = now
-
+        self.last_message_time = msg_time
     # =============================
     # 其他
     # =============================

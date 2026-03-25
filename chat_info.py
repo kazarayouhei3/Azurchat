@@ -1,12 +1,16 @@
 import os
-from PySide6.QtWidgets import QWidget, QPushButton, QToolButton, QLabel
+from PySide6.QtWidgets import QWidget, QPushButton, QToolButton
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, Signal, QEvent, QSize, Qt, QRectF
-from PySide6.QtGui import QIcon, QPixmap, QPainter, QPainterPath
+from PySide6.QtCore import QFile, Signal, QEvent, QSize, Qt
+from PySide6.QtGui import QIcon
+
+from qap import Toast
+
 
 class ChatCommand(QWidget):
     chat_signal = Signal()
     phone_signal = Signal()
+    set_signal = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -52,7 +56,12 @@ class ChatCommand(QWidget):
 
         self.chat.clicked.connect(self.chat_signal.emit)
         self.phone.clicked.connect(self.phone_signal.emit)
+        self.push_button = self.root.findChild(QPushButton, "pushButton")
+        self.push_button.clicked.connect(self.on_clicked)
 
+    def on_clicked(self):
+        Toast("等等吧", self)
+        self.set_signal.emit()
 
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal

@@ -4,6 +4,9 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Signal, QSize, Qt, QRectF
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QPainterPath
 
+from qap import Toast, get_round_pixmap
+
+
 class Chara(QWidget):
 
     back_signal = Signal()
@@ -29,47 +32,19 @@ class Chara(QWidget):
         # 如果有返回按钮
         self.back_button = self.root.findChild(QToolButton, "mainButton")
 
+
         self.back_button.clicked.connect(self.back_signal.emit)
+        self.name = self.root.findChild(QLabel, "name")
+        self.pix = self.root.findChild(QLabel, "pix")
 
-        avatar_label = self.root.findChild(QLabel, "label_3")
-        if avatar_label:
-            size = 36
-
-            # 1️⃣ 读取并等比填充
-            src = QPixmap(":/new/prefix1/head.png").scaled(
-                size, size,
-                Qt.KeepAspectRatioByExpanding,
-                Qt.SmoothTransformation
-            )
-
-            # 2️⃣ 创建透明画布
-            result = QPixmap(size, size)
-            result.fill(Qt.transparent)
-
-            # 3️⃣ 开始绘制
-            painter = QPainter(result)
-            painter.setRenderHint(QPainter.Antialiasing)
-
-            # ⭐ 圆形裁剪
-            path_circle = QPainterPath()
-            path_circle.addEllipse(QRectF(0, 0, size, size))
-            painter.setClipPath(path_circle)
-
-            # 4️⃣ 画图
-            painter.drawPixmap(0, 0, src)
-            painter.end()
-
-            # 5️⃣ 设置到 QLabel
-            avatar_label.setPixmap(result)
-            avatar_label.setFixedSize(size, size)
 
         self.mem_button = self.root.findChild(QPushButton, "mem")
         self.top_button = self.root.findChild(QPushButton, "top")
         self.del_button = self.root.findChild(QPushButton, "del")
 
-        self.mem_button.clicked.connect(self.mem_signal.emit)
-        self.top_button.clicked.connect(self.top_signal.emit)
-        self.del_button.clicked.connect(self.del_signal.emit)
+        self.mem_button.clicked.connect(self.on_mem_clicked)
+        self.top_button.clicked.connect(self.on_top_clicked)
+        self.del_button.clicked.connect(self.on_del_clicked)
 
         # ===== 3️⃣ 设置返回按钮图标 =====
         icon_path = os.path.join(base_dir, "go.png")
@@ -77,3 +52,25 @@ class Chara(QWidget):
         self.back_button.setIconSize(QSize(24, 24))
         self.back_button.setFixedSize(30, 30)
         self.back_button.setToolButtonStyle(Qt.ToolButtonIconOnly)
+
+    def set_chara_info(self, name, avatar):
+        if self.name:
+            self.name.setText(name)
+
+
+        if self.pix and avatar:
+            pix = get_round_pixmap(avatar, 36)
+            self.pix.setPixmap(pix)
+            self.pix.setFixedSize(36, 36)
+
+    def on_mem_clicked(self):
+        Toast("等等吧", self)
+        self.mem_signal.emit()
+
+    def on_top_clicked(self):
+        Toast("等等吧", self)
+        self.top_signal.emit()
+
+    def on_del_clicked(self):
+        Toast("等等吧", self)
+        self.del_signal.emit()
