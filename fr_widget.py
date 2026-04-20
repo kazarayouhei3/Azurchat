@@ -42,6 +42,7 @@ class GroupWidget(QWidget):
         super().__init__()
 
         self.is_expanded = False
+        self.current_selected = None   # ⭐记录当前选中
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -60,38 +61,27 @@ class GroupWidget(QWidget):
         """)
 
         header_layout = QHBoxLayout(self.header)
-        header_layout.setContentsMargins(10, 0, 10, 0)  # 👉 右边留点空间
+        header_layout.setContentsMargins(10, 0, 10, 0)
 
-        # ===== 箭头 =====
         self.arrow = ArrowLabel()
         self.arrow.setFixedSize(16, 16)
 
-        # ===== 标题（左）=====
         self.title = QLabel(title)
-        self.title.setStyleSheet("""
-            font-weight: 500;
-            font-size: 14px;
-        """)
+        self.title.setStyleSheet("font-weight:500; font-size:14px;")
 
-        # ===== 🔥 数量（右）=====
         self.count_label = QLabel("0")
-        self.count_label.setStyleSheet("""
-            color: #999;
-            font-size: 12px;
-        """)
+        self.count_label.setStyleSheet("color:#999; font-size:12px;")
 
-        # ===== 布局 =====
         header_layout.addWidget(self.arrow)
         header_layout.addWidget(self.title)
         header_layout.addStretch()
-        header_layout.addWidget(self.count_label)  # 👈 放最右
+        header_layout.addWidget(self.count_label)
 
         self.main_layout.addWidget(self.header)
 
-        # 点击
         self.header.mousePressEvent = lambda e: self.toggle()
 
-        # ===== 内容区域 =====
+        # ===== 内容 =====
         self.content = QWidget()
         self.content_layout = QVBoxLayout(self.content)
         self.content_layout.setContentsMargins(30, 0, 0, 0)
@@ -100,21 +90,25 @@ class GroupWidget(QWidget):
         self.content.setMaximumHeight(0)
         self.main_layout.addWidget(self.content)
 
-        # ===== 展开动画 =====
+        # 动画
         self.anim = QPropertyAnimation(self.content, b"maximumHeight")
         self.anim.setDuration(200)
         self.anim.setEasingCurve(QEasingCurve.OutCubic)
 
-        # ===== 箭头动画 =====
         self.arrow_anim = QPropertyAnimation(self.arrow, b"angle")
         self.arrow_anim.setDuration(200)
         self.arrow_anim.setEasingCurve(QEasingCurve.OutCubic)
 
         self.update_title()
 
-    # ===== 添加好友 =====
+    # ================= 添加好友 =================
     def add_item(self, friend_id, name, avatar_path="", desc="", show_add=True):
         item = QWidget()
+        item.setObjectName("friendItem")
+        item.setProperty("selected", False)
+
+        item.setAttribute(Qt.WA_StyledBackground, True)
+
         layout = QHBoxLayout(item)
         layout.setContentsMargins(10, 6, 10, 6)
         layout.setSpacing(10)
@@ -127,17 +121,31 @@ class GroupWidget(QWidget):
         if not pix.isNull():
             avatar.setPixmap(pix)
 
+        avatar.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         layout.addWidget(avatar)
 
-        # ===== 中间 =====
+        # ===== 文本 =====
         text_layout = QVBoxLayout()
         text_layout.setSpacing(2)
 
+        # ✅ 名字（不写颜色！！）
         name_label = QLabel(name)
-        name_label.setStyleSheet("font-size:14px; font-weight:600;")
+        name_label.setObjectName("nameLabel")
+        name_label.setStyleSheet("""
+            font-size:14px;
+            font-weight:600;
+            background: transparent;
+        """)
+        name_label.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
+        # ✅ 描述（不写颜色！！）
         desc_label = QLabel(desc)
-        desc_label.setStyleSheet("font-size:12px; color:#888;")
+        desc_label.setObjectName("descLabel")
+        desc_label.setStyleSheet("""
+            font-size:12px;
+            background: transparent;
+        """)
+        desc_label.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
         text_layout.addWidget(name_label)
         text_layout.addWidget(desc_label)
@@ -160,29 +168,69 @@ class GroupWidget(QWidget):
             QPushButton:hover {
                 background:#66b1ff;
             }
-            QPushButton:pressed {
-                background:#3a8ee6;
-            }
         """)
 
         btn.clicked.connect(lambda: self.item_signal.emit(friend_id))
 
-        # ⭐关键：控制显示
         if show_add:
             layout.addWidget(btn)
 
-        # ===== hover =====
+        # ===== ⭐核心QSS（完全正确版）=====
         item.setStyleSheet("""
-            QWidget:hover {
-                background:#F5F7FA;
-                border-radius:6px;
-            }
+        #friendItem {
+            background: transparent;
+            border-radius:6px;
+        }
+
+        #friendItem * {
+            background: transparent;
+        }
+
+        #friendItem:hover {
+            background:#F5F7FA;
+        }
+
+        #friendItem[selected="true"] {
+            background:#409EFF;
+        }
+
+        /* ⭐名字 */
+        #nameLabel {
+            color: #333;
+        }
+
+        /* ⭐描述 */
+        #descLabel {
+            color: #888;
+        }
+
+        /* ⭐选中全部变白 */
+        #friendItem[selected="true"] QLabel {
+            color: white;
+        }
+
+        #friendItem[selected="true"]:hover {
+            background:#409EFF;
+        }
         """)
 
-        # ===== 整行点击（推荐）=====
-        item.mousePressEvent = lambda e, fid=friend_id: self.item_signal.emit(fid)
+        # ===== 点击选中 =====
+        def on_click(e, w=item, fid=friend_id):
+            if self.current_selected and self.current_selected != w:
+                self.current_selected.setProperty("selected", False)
+                self.current_selected.style().unpolish(self.current_selected)
+                self.current_selected.style().polish(self.current_selected)
 
-        # ===== 存数据（给搜索用）=====
+            w.setProperty("selected", True)
+            w.style().unpolish(w)
+            w.style().polish(w)
+
+            self.current_selected = w
+            self.item_signal.emit(fid)
+
+        item.mousePressEvent = on_click
+
+        # ===== 存数据 =====
         item.setProperty("friend_id", friend_id)
         item.setProperty("name", name)
         item.setProperty("avatar", avatar_path)
@@ -191,10 +239,11 @@ class GroupWidget(QWidget):
 
         self.count += 1
         self.update_title()
-    # ===== 🔥 更新标题（只更新右边）=====
+    # ================= 标题 =================
     def update_title(self):
         self.count_label.setText(str(self.count))
 
+    # ================= 已添加 =================
     def set_added(self, friend_id):
         for i in range(self.content_layout.count()):
             item = self.content_layout.itemAt(i).widget()
@@ -206,7 +255,8 @@ class GroupWidget(QWidget):
                 if btn:
                     btn.setText("已添加")
                     btn.setEnabled(False)
-    # ===== 展开/收起 =====
+
+    # ================= 展开 =================
     def toggle(self):
         self.is_expanded = not self.is_expanded
 

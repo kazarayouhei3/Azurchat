@@ -1,9 +1,8 @@
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout
 from PySide6.QtGui import QPainter, QPainterPath, QPixmap
 from PySide6.QtCore import Qt, QRectF
-import rc_head
-from qap import get_round_pixmap
 
+from qap import get_round_pixmap
 
 class ChatItem(QWidget):
     def __init__(self, fid, name, message, time_text, avatar_path, parent=None):
@@ -22,6 +21,12 @@ class ChatItem(QWidget):
         # ===== 内层：真正的内容容器（动画目标）=====
         self.content = QWidget(self)
         outer_layout.addWidget(self.content)
+        self.content.setMinimumWidth(1)
+        self.content.setSizePolicy(
+            self.sizePolicy().horizontalPolicy(),
+            self.sizePolicy().verticalPolicy()
+        )
+        self.content.setStyleSheet("border-radius: 8px;")
 
         main_layout = QHBoxLayout(self.content)
         main_layout.setContentsMargins(12, 8, 12, 8)
@@ -59,3 +64,14 @@ class ChatItem(QWidget):
         self.time_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
 
         main_layout.addWidget(self.time_label)
+
+    def enterEvent(self, event):
+        self.content.setStyleSheet("""
+            background-color: #E2E2E2;
+            border-radius: 8px;
+        """)
+
+    def leaveEvent(self, event):
+        self.content.setStyleSheet("""
+            background-color: transparent;
+        """)

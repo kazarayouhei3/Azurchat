@@ -14,7 +14,9 @@
    <string>Widget</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QWidget{
+    background: transparent;
+}</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -29,6 +31,9 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <property name="sizePolicy">
@@ -38,7 +43,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #ECF3FA;</string>
+      <string notr="true">background:#EBF3FF;</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
@@ -59,7 +64,7 @@
       <item row="1" column="0">
        <widget class="QWidget" name="AzurChat" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>1</verstretch>
          </sizepolicy>
@@ -82,54 +87,27 @@
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: #FFFFFF;</string>
+         <string notr="true">background-color: #FFFFFF;
+border-bottom-left-radius: 20px;
+border-bottom-right-radius: 20px;
+</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <property name="topMargin">
-          <number>12</number>
+         <property name="leftMargin">
+          <number>10</number>
          </property>
-         <item row="0" column="3">
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="1">
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label">
-           <property name="font">
-            <font>
-             <family>PingFang SC</family>
-             <pointsize>15</pointsize>
-             <italic>false</italic>
-             <bold>false</bold>
-             <stylestrategy>PreferDefault</stylestrategy>
-            </font>
-           </property>
-           <property name="text">
-            <string>AzurChat</string>
-           </property>
-          </widget>
-         </item>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <item row="0" column="4">
           <widget class="QToolButton" name="quit_button">
            <property name="styleSheet">
@@ -169,18 +147,372 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+             <pointsize>15</pointsize>
+             <italic>false</italic>
+             <bold>false</bold>
+             <stylestrategy>PreferDefault</stylestrategy>
+            </font>
+           </property>
+           <property name="text">
+            <string>AzurChat</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="3">
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="0">
+          <widget class="QToolButton" name="toolButton">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">
+        QToolButton {
+            border: none;
+            padding: 2px;
+        }
+
+        /* 关键：干掉下拉箭头 */
+        QToolButton::menu-indicator {
+            image: none;
+        }</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="pic.qrc">
+             <normaloff>:/icon/head.jpg</normaloff>:/icon/head.jpg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>15</width>
+             <height>15</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
       <item row="2" column="0">
+       <widget class="QStackedWidget" name="stackedWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>12</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="mainPage">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QListWidget" name="list">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>10</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QListWidget {
+    border: none;          /* 去外框 */
+    outline: none;         /* 去焦点框（很关键） */
+    background: transparent;     /* 统一背景 */
+}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="contact">
+         <layout class="QGridLayout" name="gridLayout_9">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_5" native="true">
+            <layout class="QGridLayout" name="gridLayout_10">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QWidget" name="widget_6" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>1</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_11">
+                <property name="leftMargin">
+                 <number>6</number>
+                </property>
+                <property name="topMargin">
+                 <number>6</number>
+                </property>
+                <property name="rightMargin">
+                 <number>6</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>6</number>
+                </property>
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="contactButton">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>1</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Microsoft YaHei</family>
+                    <pointsize>15</pointsize>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">QPushButton {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 10px 10px 15px;
+    text-align: left;
+    background: transparent;
+}
+
+QPushButton:hover {
+    background-color: #e6e6e6;
+}
+
+QPushButton:pressed {
+    background-color: #d0d0d0;
+}</string>
+                  </property>
+                  <property name="text">
+                   <string>加好友</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="pic.qrc">
+                    <normaloff>:/icon/friend.svg</normaloff>:/icon/friend.svg</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QWidget" name="contactList" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>10</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="setting">
+         <layout class="QGridLayout" name="gridLayout_7">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_4" native="true">
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="azurButton">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    padding-left: 15px;   /* 控制整体往左贴 */
+    text-align: left;     /* 文字左对齐 */
+}
+
+QPushButton:hover {
+    background-color: #e6e6e6;
+}
+
+QPushButton:pressed {
+    background-color: #d0d0d0;
+}</string>
+               </property>
+               <property name="text">
+                <string>我的港区</string>
+               </property>
+               <property name="icon">
+                <iconset resource="pic.qrc">
+                 <normaloff>:/icon/area.svg</normaloff>:/icon/area.svg</iconset>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="settingButton">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>14</pointsize>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    padding-left: 15px;   /* 控制整体往左贴 */
+    text-align: left;     /* 文字左对齐 */
+}
+
+QPushButton:hover {
+    background-color: #e6e6e6;
+}
+
+QPushButton:pressed {
+    background-color: #d0d0d0;
+}</string>
+               </property>
+               <property name="text">
+                <string>设置</string>
+               </property>
+               <property name="icon">
+                <iconset resource="pic.qrc">
+                 <normaloff>:/new/prefix1/set.png</normaloff>:/new/prefix1/set.png</iconset>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QWidget" name="widget_3" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <family>PingFang SC</family>
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true"/>
+         <string notr="true">background:white;</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
          <property name="leftMargin">
@@ -199,39 +531,15 @@
           <number>0</number>
          </property>
          <item row="0" column="0">
-          <widget class="QListWidget" name="list">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>10</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QListWidget {
-    border: none;
-    outline: none;
-    padding: 10px;
-}
-
-QListWidget::item:selected {
-    background: transparent;
-}</string>
-           </property>
-           <property name="lineWidth">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
           <widget class="QWidget" name="widget_2" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
+             <verstretch>2</verstretch>
             </sizepolicy>
            </property>
            <property name="styleSheet">
-            <string notr="true"/>
+            <string notr="true">    background-color: #D7DDEA;</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
             <property name="leftMargin">
@@ -249,53 +557,47 @@ QListWidget::item:selected {
             <property name="spacing">
              <number>0</number>
             </property>
-            <item row="0" column="2">
-             <widget class="QToolButton" name="my">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QToolButton {
-            border: none;
-            background: transparent;
-            color: #666;
-            border-top: 2px solid #E5E7EB;
-            background-color: #DCE3EA;
-        }
-</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QToolButton" name="chat">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
+                <horstretch>1</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="styleSheet">
                <string notr="true">QToolButton {
-            border: none;
-            background: transparent;
-            color: #666;
-        }
-</string>
+    border: none;
+    color: #666;
+    padding: 6px 10px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+QToolButton:hover {
+    color: #1677FF;
+}
+
+/* ⭐ 提高优先级 */
+QToolButton:checked {
+    background-color: #EBF3FF;
+    color: #1677FF;
+}</string>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="iconSize">
                <size>
-                <width>30</width>
-                <height>30</height>
+                <width>20</width>
+                <height>20</height>
                </size>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
               </property>
               <property name="popupMode">
                <enum>QToolButton::ToolButtonPopupMode::DelayedPopup</enum>
@@ -305,27 +607,162 @@ QListWidget::item:selected {
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="1" column="2">
              <widget class="QToolButton" name="phone">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
+                <horstretch>1</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="styleSheet">
                <string notr="true">QToolButton {
-            border: none;
+    border: none;
+    color: #666;
+    padding: 5px;
+    qproperty-iconSize: 20px 20px;
+}
 
-            color: #666;
-            border-top: 2px solid #E5E7EB;
-            background-color: #DCE3EA;
-        }
-</string>
+/* ❌ hover 不再改背景 */
+QToolButton:hover {
+    color: #1677FF;   /* ⭐只改文字颜色 */
+}
+
+/* ✅ 选中才改背景 */
+QToolButton:checked {
+    background-color: #EBF3FF;
+    color: #1677FF;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}</string>
               </property>
               <property name="text">
                <string/>
               </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QToolButton" name="my">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QToolButton {
+    border: none;
+
+    color: #666;
+    padding: 5px;
+    qproperty-iconSize: 20px 20px;
+    border-bottom-right-radius: 20px;
+}
+
+/* ❌ hover 不再改背景 */
+QToolButton:hover {
+    color: #1677FF;   /* ⭐只改文字颜色 */
+}
+
+/* ✅ 选中才改背景 */
+QToolButton:checked {
+    background-color: #EBF3FF;
+    color: #1677FF;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QWidget" name="widget_7" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_12">
+               <property name="leftMargin">
+                <number>5</number>
+               </property>
+               <property name="topMargin">
+                <number>5</number>
+               </property>
+               <property name="rightMargin">
+                <number>5</number>
+               </property>
+               <property name="bottomMargin">
+                <number>5</number>
+               </property>
+               <property name="spacing">
+                <number>5</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="QToolButton" name="chatButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>1</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QToolButton {
+    border: none;
+    color: #666;
+    padding: 6px 12px;
+    border-radius: 12px;   /* ⭐ 必须有 */
+    qproperty-iconSize: 20px 20px;
+}
+QToolButton::hover {
+    color: #1677FF;
+}
+
+/* ⭐ hover 出现“浅蓝块” */
+QToolButton:hover:!checked {
+    color: #1677FF;
+    background-color: #C9D1E3;   /* ⭐ 关键 */
+}</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="checkable">
+                  <bool>false</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <property name="autoRepeat">
+                  <bool>false</bool>
+                 </property>
+                 <property name="autoExclusive">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>

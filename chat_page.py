@@ -1,4 +1,6 @@
 import os
+import time
+
 from PySide6.QtWidgets import (
     QWidget, QToolButton, QLabel,
     QHBoxLayout, QListWidget,
@@ -9,12 +11,14 @@ from PySide6.QtCore import QFile, QSize, Qt, Signal, QTimer
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QPainterPath
 
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from db import get_messages_by_fid, insert_message, update_conversation_last, get_conv_id
 from qap import get_round_pixmap
 from use_api import Chat
 
+from PySide6.QtWidgets import QStackedLayout
+from chara import Chara
 
 class ChatPage(QWidget):
     ai_reply_signal = Signal(object)
@@ -36,11 +40,18 @@ class ChatPage(QWidget):
         self.root = loader.load(file)
         file.close()
         self.root.setParent(self)
-
+        self.root.setStyleSheet("""
+            QWidget {
+                border: none;
+                background: transparent;
+            }
+        """)
         # ===== 控件 =====
         self.back_button = self.root.findChild(QToolButton, "mainButton")
         self.title_label = self.root.findChild(QLabel, "chara")
         self.list = self.root.findChild(QListWidget, "listWidget")
+
+        self.list.setSelectionMode(QListWidget.NoSelection)
 
         if self.back_button:
             icon_path = os.path.join(base_dir, "go.png")
@@ -50,38 +61,56 @@ class ChatPage(QWidget):
 
         if self.list:
             self.list.setStyleSheet("""
-                QListWidget {
+                QListWidget::item {
+                    background: transparent;
                     border: none;
-                    background-color: #EEF2F6;
-                    padding: 10px;
                 }
-
+                
+                QListWidget::item:selected {
+                    background: transparent;
+                    border: none;
+                }
+                
+                QListWidget::item:focus {
+                    outline: none;
+                    border: none;
+                    background: transparent;
+                }
+                
+                QListWidget {
+                    outline: none;
+                }
                 QScrollBar:vertical {
                     background: transparent;
-                    width: 8px;
-                    margin: 4px 2px 4px 0px;
+                    width: 10px;
+                    margin: 20px 2px 20px 0px;
                 }
-
+                
                 QScrollBar::handle:vertical {
-                    background: rgba(0, 0, 0, 0.2);
-                    border-radius: 4px;
-                    min-height: 30px;
+                    background: #C1C1C1;   /* 默认灰 */
+                    border-radius: 5px;
+                    min-height: 40px;
                 }
-
+                
                 QScrollBar::handle:vertical:hover {
-                    background: rgba(0, 0, 0, 0.4);
+                    background: #A8A8A8;   /* hover稍深一点 */
                 }
-
+                
+                QScrollBar::handle:vertical:pressed {
+                    background: #8E8E8E;   /* 点击更深 */
+                }
+                
                 QScrollBar::add-line:vertical,
                 QScrollBar::sub-line:vertical {
                     height: 0px;
                 }
-
+                
                 QScrollBar::add-page:vertical,
                 QScrollBar::sub-page:vertical {
                     background: transparent;
                 }
             """)
+        self.list.verticalScrollBar().setSingleStep(5)
 
         self.original_title = ""
         self.input = self.root.findChild(QLineEdit, "lineEdit")
@@ -90,6 +119,18 @@ class ChatPage(QWidget):
         if self.send_btn:
             self.send_btn.clicked.connect(self.send_message)
 
+        self.stack = QStackedLayout(self)
+
+        self.chat_root = self.root
+        self.page_chara = Chara()
+
+        self.stack.addWidget(self.chat_root)
+        self.stack.addWidget(self.page_chara)
+
+        self.bind_open_chara(self.open_chara)
+
+        # 返回
+        self.page_chara.back_signal.connect(self.back_to_chat)
         self.last_message_time = None
         self.chat_engine = None
 
@@ -141,6 +182,10 @@ class ChatPage(QWidget):
     def ask_ai(self, text, fid, engine):
         try:
             reply = engine.chat(text)
+
+            delay = min(len(reply) * 0.05, 2)  # 最多2秒
+            time.sleep(delay)
+
         except Exception as e:
             reply = f"请求失败：{str(e)}"
 
@@ -187,11 +232,9 @@ class ChatPage(QWidget):
 
         self.chat_engine = self.chat_engines[fid]
 
-        # ⭐ 加载历史消息
-        self.load_chat(fid)
-
         # ⭐ 重置时间（避免时间错乱）
         self.last_message_time = None
+        self.load_chat(fid)
 
 
     # =============================
@@ -227,12 +270,16 @@ class ChatPage(QWidget):
         item = QListWidgetItem()
 
         bubble = QLabel(text)
+
         bubble.setWordWrap(True)
         bubble.setMaximumWidth(300)
         bubble.setStyleSheet("background:white; padding:8px; border-radius:10px;")
+        bubble.setTextInteractionFlags(
+            Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard
+        )
 
         layout = QHBoxLayout()
-
+        layout.setContentsMargins(8, 0, 0, 0)
         # ⭐ 头像
         avatar_label = QLabel()
         avatar_label.setFixedSize(36, 36)
@@ -271,6 +318,9 @@ class ChatPage(QWidget):
         bubble.setMaximumWidth(380)
         bubble.setStyleSheet("background:#95EC69; padding:8px; border-radius:10px;")
 
+        bubble.setTextInteractionFlags(
+            Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard
+        )
         layout = QHBoxLayout()
         layout.addStretch()
         layout.addWidget(bubble)
@@ -283,6 +333,7 @@ class ChatPage(QWidget):
         item.setSizeHint(widget.sizeHint())
 
         self.list.scrollToBottom()
+        self.list.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         if not self.is_loading:
             self.chat_history.setdefault(self.current_fid, []).append(("right", text))
@@ -294,7 +345,12 @@ class ChatPage(QWidget):
         item = QListWidgetItem()
         label = QLabel(text)
         label.setAlignment(Qt.AlignCenter)
-
+        label.setStyleSheet("""
+            color: #999999;
+            font-size: 11px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        """)
         self.list.addItem(item)
         self.list.setItemWidget(item, label)
         item.setSizeHint(label.sizeHint())
@@ -303,6 +359,12 @@ class ChatPage(QWidget):
             self.chat_history.setdefault(self.current_fid, []).append(("time", text))
 
     def check_and_add_time(self, time_str=None):
+        if self.is_loading:
+            # ⭐ 加载历史时也要正常算，但用更宽松策略
+            threshold = 300  # 5分钟
+        else:
+            threshold = 300
+
         if time_str:
             try:
                 msg_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
@@ -312,12 +374,25 @@ class ChatPage(QWidget):
             msg_time = datetime.now()
 
         if not self.last_message_time:
-            self.add_time_label(msg_time.strftime("%H:%M"))
+            self.add_time_label(self.format_time(msg_time))
         else:
-            if (msg_time - self.last_message_time).total_seconds() >= 60:
-                self.add_time_label(msg_time.strftime("%H:%M"))
+            delta = (msg_time - self.last_message_time).total_seconds()
+            if delta >= threshold:
+                self.add_time_label(self.format_time(msg_time))
 
         self.last_message_time = msg_time
+
+    def format_time(self, msg_time):
+        now = datetime.now()
+
+        if msg_time.date() == now.date():
+            return msg_time.strftime("%H:%M")  # 今天 → 10:43
+        elif msg_time.date() == (now.date() - timedelta(days=1)):
+            return "昨天 " + msg_time.strftime("%H:%M")
+        elif msg_time.year == now.year:
+            return msg_time.strftime("%m-%d %H:%M")
+        else:
+            return msg_time.strftime("%Y-%m-%d %H:%M")
     # =============================
     # 其他
     # =============================
@@ -338,3 +413,13 @@ class ChatPage(QWidget):
         tool_button = self.root.findChild(QToolButton, "menu")
         if tool_button:
             tool_button.clicked.connect(callback)
+
+    def open_chara(self):
+        self.page_chara.set_chara_info(
+            self.current_name,
+            self.current_avatar
+        )
+        self.stack.setCurrentWidget(self.page_chara)
+
+    def back_to_chat(self):
+        self.stack.setCurrentWidget(self.chat_root)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal" created-in="PY-253.29346.308">
-    <data-source name="chat" uuid="9c39d5b6-5591-465d-afdb-42e98011aac7">
+    <data-source name="chat" uuid="0e700e2b-73fe-4271-9c12-275f158bce55">
       <database-info product="SQLite" version="3.51.1" jdbc-version="4.2" driver-name="SQLite JDBC" driver-version="3.51.1.0" dbms="SQLITE" exact-version="3.51.1" exact-driver-version="3.51">
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>
@@ -9,7 +9,7 @@
       <auth-provider>no-auth</auth-provider>
       <schema-mapping>
         <introspection-scope>
-          <node kind="schema" qname="main" />
+          <node kind="schema" qname="@" />
         </introspection-scope>
       </schema-mapping>
     </data-source>

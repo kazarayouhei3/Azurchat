@@ -16,6 +16,9 @@ import json
 
 from db import update_user_api
 import rc_pic
+from qap import Toast
+
+
 class API(QWidget):
     signal = Signal()
     reg_signal = Signal()

@@ -1,6 +1,5 @@
 import os
 
-from PySide6.QtGui import QPixmap, QPainterPath, QPainter
 from PySide6.QtWidgets import (
     QWidget, QPushButton, QToolButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
 )

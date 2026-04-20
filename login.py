@@ -1,31 +1,33 @@
 import os
+
 from PySide6.QtWidgets import (
-    QWidget, QToolButton, QLabel,
+    QWidget, QToolButton,
     QLineEdit, QPushButton,
-    QMenu, QApplication
+    QGraphicsBlurEffect
 )
-
-from api_dialog import API
-
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile
-from PySide6.QtWidgets import QMessageBox, QGraphicsBlurEffect
-from PySide6.QtCore import Signal
-
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QFile, QPoint, Signal, Qt, QUrl
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtCore import QUrl, Qt
+
+from custom import CustomMenu
 from db import check_user, check_api
 from qap import Toast
 from reg import Reg
+from api_dialog import API
 from PySide6.QtWidgets import QStackedLayout
 
+
 class Login(QWidget):
-    signal = Signal(str)
+    signal = Signal(str)   # ⭐ 只负责把用户名发出去
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # ===== 1️⃣ 加载 UI =====
+        # ===== 无边框 =====
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
+        # ===== 加载 UI =====
         loader = QUiLoader()
         base_dir = os.path.dirname(__file__)
         ui_path = os.path.join(base_dir, "login.ui")
@@ -35,32 +37,36 @@ class Login(QWidget):
         self.root = loader.load(file)
         file.close()
 
-        # 把 UI 根挂到当前页面
-        self.root.setParent(self)
-
-        # ===== ⭐ 创建注册页 =====
+        # ===== 注册页 =====
         self.reg_page = Reg()
 
-        # ===== ⭐ 页面栈 =====
-        self.stack = QStackedLayout(self)
-        self.stack.addWidget(self.root)  # login页面
-        self.stack.addWidget(self.reg_page)  # reg页面
+        # ===== 页面栈 =====
+        self.stack = QStackedLayout()
+        self.stack.setContentsMargins(0, 0, 0, 0)
+
+        self.stack.addWidget(self.root)
+        self.stack.addWidget(self.reg_page)
 
         self.setLayout(self.stack)
+        self.stack.setCurrentWidget(self.root)
 
+        self.resize(380, 680)
+
+        # ===== 控件绑定 =====
         self.user = self.root.findChild(QLineEdit, "user")
         self.password = self.root.findChild(QLineEdit, "password")
+        self.login_button = self.root.findChild(QPushButton, "loginButton")
+        self.reg_btn = self.root.findChild(QPushButton, "reg")
+        self.que = self.root.findChild(QPushButton, "que")
+        self.menu_button = self.root.findChild(QToolButton, "menuButton")
 
         self.user.setPlaceholderText("请输入用户名")
         self.password.setPlaceholderText("请输入密码")
 
-        self.login_button = self.root.findChild(QPushButton, "loginButton")
-
+        # ===== 事件 =====
         self.login_button.clicked.connect(self.handle_login)
 
-        self.reg = self.root.findChild(QPushButton, "reg")
-        self.reg.setCursor(Qt.PointingHandCursor)
-        self.reg.clicked.connect(
+        self.reg_btn.clicked.connect(
             lambda: self.stack.setCurrentWidget(self.reg_page)
         )
         self.reg_page.b_signal.connect(
@@ -70,63 +76,50 @@ class Login(QWidget):
             lambda: self.stack.setCurrentWidget(self.root)
         )
 
-        self.que = self.root.findChild(QPushButton, "que")
-        self.que.setCursor(Qt.PointingHandCursor)
-
         self.que.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl("https://www.baidu.com"))
         )
 
-        self.menu_button = self.root.findChild(QToolButton, "menuButton")
-
         self.init_menu()
 
+    # ===== 菜单 =====
     def init_menu(self):
-        self.menu = QMenu()
-        self.menu.setWindowFlags(
-        Qt.Popup | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint
+        self.menu = CustomMenu(self)
+
+        self.menu.about_btn.clicked.connect(self.show_about)
+        self.menu.exit_btn.clicked.connect(self.close)
+
+        self.menu_button.clicked.connect(self.show_menu)
+
+    def show_menu(self):
+        pos = self.menu_button.mapToGlobal(
+            self.menu_button.rect().bottomLeft() + QPoint(0, 6)
         )
-        about_action = self.menu.addAction("关于")
-        self.menu.addSeparator()
-        exit_action = self.menu.addAction("退出")
-        exit_action.triggered.connect(QApplication.quit)
-
-        self.menu_button.setPopupMode(QToolButton.InstantPopup)
-        self.menu_button.setMenu(self.menu)
-
-        about_action.triggered.connect(self.show_about)
-        self.menu.setStyleSheet("""
-        QMenu {
-                background: white;
-                border-radius: 12px;
-                padding: 6px;
-        }
-
-        QMenu::item {
-            padding: 8px 24px;
-            border-radius: 8px;
-            color: #4B5563;
-        }
-
-        QMenu::item:selected {
-            background-color: #F3E8FF;
-            color: #7C3AED;
-        }
-
-        QMenu::separator {
-            height: 1px;
-            background: #F3E8FF;
-            margin: 6px 12px;
-        }
-         """)
+        self.menu.move(pos)
+        self.menu.show()
 
     def show_about(self):
         QMessageBox.about(
-                self,
-                "关于",
-                "AzurChat v1.0\n\n基于 PySide6 开发"
-            )
+            self,
+            "关于",
+            "AzurChat v1.0\n\n基于 PySide6 开发"
+        )
 
+    # ===== 拖拽窗口 =====
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._drag_pos = event.globalPosition().toPoint()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton:
+            delta = event.globalPosition().toPoint() - self._drag_pos
+            self.move(self.pos() + delta)
+            self._drag_pos = event.globalPosition().toPoint()
+
+    def mouseReleaseEvent(self, event):
+        self._drag_pos = None
+
+    # ===== 登录逻辑 =====
     def handle_login(self):
         username = self.user.text().strip()
         password = self.password.text().strip()
@@ -149,7 +142,7 @@ class Login(QWidget):
 
             if api_ok:
                 Toast("登录成功", self)
-                self.signal.emit(username)
+                self.signal.emit(username)   # ⭐核心：只发信号
             else:
                 self.open_api_dialog(username)
 
@@ -159,27 +152,18 @@ class Login(QWidget):
         self.user.clear()
         self.password.clear()
 
+    # ===== API弹窗 =====
     def open_api_dialog(self, username):
-
-        # 添加模糊
         self.blur = QGraphicsBlurEffect()
         self.blur.setBlurRadius(15)
         self.root.setGraphicsEffect(self.blur)
 
-        # 创建 API 页面
         self.api = API(parent=self, username=username)
-
-        # 覆盖 Login
         self.api.setGeometry(0, 0, self.width(), self.height())
 
-        # 关闭信号
         self.api.signal.connect(self.close_api_dialog)
-
         self.api.show()
 
     def close_api_dialog(self):
-
-        # 移除模糊
         self.root.setGraphicsEffect(None)
-
         self.api.close()

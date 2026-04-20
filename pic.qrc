@@ -1,30 +1,41 @@
 <RCC>
     <qresource prefix="/new/prefix1">
+        <file>azur.ico</file>
         <file>caidan.png</file>
+        <file>go.png</file>
         <file>send.png</file>
         <file>set.png</file>
-        <file>azur.ico</file>
-        <file>go.png</file>
     </qresource>
     <qresource prefix="/">
+        <file>icon/azur.svg</file>
+        <file>icon/click-2.svg</file>
+        <file>icon/click.svg</file>
         <file>icon/del.png</file>
+        <file>icon/friend.svg</file>
         <file>icon/mem.png</file>
-        <file>icon/top.png</file>
-        <file>icon/talk.svg</file>
-        <file>icon/talk_select.svg</file>
-        <file>icon/phone.svg</file>
-        <file>icon/phone_select.svg</file>
         <file>icon/my.svg</file>
         <file>icon/my_select.svg</file>
+        <file>icon/phone.svg</file>
+        <file>icon/phone_select.svg</file>
         <file>icon/quit.svg</file>
-        <file>icon/friend.svg</file>
-        <file>icon/click.svg</file>
-        <file>icon/click-2.svg</file>
         <file>icon/search.svg</file>
+        <file>icon/talk.svg</file>
+        <file>icon/talk_select.svg</file>
+        <file>icon/top.png</file>
+        <file>azur.ico</file>
+        <file>icon/area.svg</file>
+        <file>icon/head.jpg</file>
+        <file>icon/likelike.svg</file>
+        <file>icon/like.svg</file>
+        <file>icon/mem.svg</file>
+        <file>icon/record.svg</file>
+        <file>icon/arch.svg</file>
     </qresource>
     <qresource prefix="/head">
         <file>icon/enterprise.png</file>
         <file>icon/hipper.png</file>
+        <file>icon/newjersey.png</file>
         <file>icon/Tashkent.png</file>
+        <file>icon/yorktown.png</file>
     </qresource>
 </RCC>

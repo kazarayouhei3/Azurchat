@@ -29,6 +29,9 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <property name="sizePolicy">
@@ -181,7 +184,7 @@
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>12</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -189,8 +192,8 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <property name="horizontalSpacing">
-          <number>12</number>
+         <property name="spacing">
+          <number>0</number>
          </property>
          <item row="2" column="0">
           <widget class="QWidget" name="widget_4" native="true">
@@ -209,7 +212,7 @@
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>1</horstretch>
-                <verstretch>5</verstretch>
+                <verstretch>3</verstretch>
                </sizepolicy>
               </property>
               <property name="maximumSize">
@@ -220,26 +223,27 @@
               </property>
               <property name="font">
                <font>
-                <pointsize>10</pointsize>
+                <pointsize>-1</pointsize>
                 <bold>true</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QPushButton#loginButton {
+               <string notr="true">QPushButton {
     background-color: #8FB9D6;
     color: white;
     border-radius: 25px;
-    border: none;
+    padding: 5px;
+
+    font-size: 16px;
 }
 
-QPushButton#loginButton:hover {
-    background-color: #3B82F6;
+QPushButton:hover {
+    background-color: #6B95C5;
 }
 
-QPushButton#loginButton:pressed {
-    background-color: #1D4ED8;
-}
-</string>
+QPushButton:pressed {
+    background-color: #5A82B0;
+}</string>
               </property>
               <property name="text">
                <string>登录</string>
@@ -356,14 +360,22 @@ QPushButton#loginButton:pressed {
               </property>
               <property name="font">
                <font>
-                <pointsize>10</pointsize>
+                <pointsize>-1</pointsize>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">    background-color: white;
-    border-radius: 20px;
-    padding: 10px;
-border: 1px solid #E0E0E0;</string>
+               <string notr="true">QLineEdit {
+    background-color: #FFFFFF;   /* ⭐改白色 */
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 15px;
+
+    padding: 5px 5px;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    border: 1px solid #7FA8D6;
+}</string>
               </property>
               <property name="text">
                <string/>
@@ -386,14 +398,22 @@ border: 1px solid #E0E0E0;</string>
               </property>
               <property name="font">
                <font>
-                <pointsize>10</pointsize>
+                <pointsize>-1</pointsize>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">    background-color: white;
-    border-radius: 20px;
-   padding: 10px;
-border: 1px solid #E0E0E0;</string>
+               <string notr="true">QLineEdit {
+    background-color: #FFFFFF;   /* ⭐改白色 */
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 15px;
+
+    padding: 5px 5px;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    border: 1px solid #7FA8D6;
+}</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignmentFlag::AlignCenter</set>

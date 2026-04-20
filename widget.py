@@ -1,70 +1,107 @@
 # This Python file uses the following encoding: utf-8
-import sys
+from datetime import datetime, timedelta
 
 from PySide6.QtWidgets import (
     QApplication, QWidget, QToolButton,
-    QListWidgetItem, QStackedLayout, QSplashScreen
+    QListWidgetItem, QStackedLayout, QSplashScreen, QPushButton,
+    QVBoxLayout
 )
 from PySide6.QtCore import QSize, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 
-
+from personcord import Personcord
+from qap import Toast
+from setting_dialog import Setting
 from ui_form import Ui_Widget
 
 from chat_item import ChatItem
 from chat_page import ChatPage
 from PySide6.QtCore import Qt, QEvent
-from chat_info import ChatCommand
-from PySide6.QtGui import QPixmap, QIcon
-from chara import Chara
-from login import Login
-from fr import Fr
 
-from db import init_db, get_conversations_with_avatar, load_all_friends_from_json, get_prompt_by_id
+from PySide6.QtGui import QPixmap, QIcon
+
+from Contact import Contact
+from my import My
+import rc_pic
+
+from db import get_conversations_with_avatar, get_prompt_by_id, get_user_profile
 
 
 class Widget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        init_db()
-        load_all_friends_from_json()
+
         # ===== 主列表页 =====
         self.ui = Ui_Widget()
         self.ui.setupUi(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
-        # ===== stack 结构（同窗口切换）=====
+        # ===== 新增：代码里补一层全局页面管理，不动 ui =====
         old_layout = self.layout()
+        if old_layout is None:
+            raise RuntimeError("setupUi 后没有拿到根布局")
 
-        self.page_list = QWidget()
-        self.page_list.setLayout(old_layout)
+        # 取出原来 layout 里的所有子项，暂存
+        items = []
+        while old_layout.count():
+            item = old_layout.takeAt(0)
+            items.append(item)
 
-        self.info = ChatCommand()
+        # home_page：承载原来整页 UI
+        self.home_page = QWidget(self)
+        self.home_page.setObjectName("home_page")
 
-        self.login = Login()
+        home_layout = QVBoxLayout(self.home_page)
+        home_layout.setContentsMargins(0, 0, 0, 0)
+        home_layout.setSpacing(0)
+
+        # 把原来布局里的内容放进 home_page
+        for item in items:
+            if item.widget():
+                item.widget().setParent(self.home_page)
+                home_layout.addWidget(item.widget())
+            elif item.layout():
+                home_layout.addLayout(item.layout())
+            elif item.spacerItem():
+                home_layout.addItem(item.spacerItem())
+
+        # 删掉原来挂在 self 上的空布局
+        QWidget().setLayout(old_layout)
+
+        # 全局 stack：管理 home_page / chat_page / add_friend_page ...
+        self.global_stack = QStackedLayout()
+        self.global_stack.setContentsMargins(0, 0, 0, 0)
+        self.global_stack.setSpacing(0)
+        self.global_stack.addWidget(self.home_page)
+
+        self.setLayout(self.global_stack)
+
+        self.contact = Contact(self.ui.contact)
+        self.contact.open_confirm_page.connect(self.bind_confirm_page_signal)
+        self.contact.open_add_page.connect(self.bind_add_page_signal)
+
 
         self.page_chat = None
-        self.fr = Fr()
-        self.stack = QStackedLayout(self)
-        self.stack.setContentsMargins(0, 0, 0, 0)
-        self.stack.addWidget(self.page_list)  # index 0
-        self.setLayout(self.stack)
-
-        self.page_chara = Chara()
-        self.stack.addWidget(self.page_chara)  # index 2
-        self.stack.addWidget(self.info)  # index 3
-        self.stack.addWidget(self.login)  # index 4
-        self.stack.addWidget(self.fr)  # index 5
-
-        self.stack.setCurrentWidget(self.login)
 
         self.ui.quit_button.clicked.connect(self.close)
 
-        self.login.signal.connect(self.after_login)
-        self.login.signal.connect(self.after_login)
-
-        self.fr.add_success.connect(self.on_add_friend_success)
+        self.contact.add_success.connect(self.on_add_friend_success)
         # 点击会话进入聊天页
         self.ui.list.itemClicked.connect(self.open_chat_in_place)
+
+        self.person_btn = self.ui.toolButton
+
+        self.person_btn.clicked.connect(self.open_person_from_top)
+
+        self.my = My()
+        self.my.signal.connect(self.back_from_my)
+        self.my.personcordsignal.connect(self.back_from_personcord)
+
+        self.personcord = Personcord()
+        self.personcord.signal.connect(self.back_my)
+        self.global_stack.addWidget(self.personcord)
+
+        self.setting_page = Setting()
+        self.global_stack.addWidget(self.setting_page)
 
         # ===== 动画数据 =====
         self._anims = []
@@ -83,6 +120,13 @@ class Widget(QWidget):
             True
         )
         self.init_nav_button(
+            self.ui.chatButton,
+            ":/icon/talk.svg",
+            ":/icon/talk_select.svg",
+            "聊天",
+            False  # ⭐ 默认不选中
+        )
+        self.init_nav_button(
             self.ui.phone,
             ":/icon/phone.svg",
             ":/icon/phone_select.svg",
@@ -97,52 +141,126 @@ class Widget(QWidget):
             "我的",
             False
         )
+        self.home_stack = self.ui.stackedWidget
+        self.ui.chat.clicked.connect(
+            lambda: self.nav(self.ui.chat, self.ui.mainPage)
+        )
 
         self.ui.phone.clicked.connect(
-            lambda: self.stack.setCurrentWidget(self.fr)
+            lambda: self.nav(self.ui.phone, self.ui.contact)
         )
+
         self.ui.my.clicked.connect(
-            lambda: self.stack.setCurrentWidget(self.info)
+            lambda: self.nav(self.ui.my, self.ui.setting)
         )
+        self.ui.chatButton.clicked.connect(
+            lambda: self.nav(self.ui.chatButton, self.ui.mainPage)
+        )
+        self.setting_btn = self.ui.setting.findChild(QPushButton, "settingButton")
+        self.setting_btn.clicked.connect(self.on_setting_clicked)
+        self.setting_btn.installEventFilter(self)
 
-        self.fr.chat_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.page_list)
-        )
-        self.fr.my_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.info)
-        )
-        self.fr.signal.connect(self.close)
-
-        self.info.chat_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.page_list)
-        )
-
-        self.info.phone_signal.connect(
-            lambda: self.stack.setCurrentWidget(self.fr)
-        )
         self._last_chat_ids = []
-        self.page_chara.back_button.clicked.connect(
-            lambda: self.stack.setCurrentWidget(self.page_chat)
+
+    def show_add_page(self, page):
+        if hasattr(page, "on_hide"):
+            page.on_hide()
+
+        if self.global_stack.indexOf(page) == -1:
+            self.global_stack.addWidget(page)
+
+        self.global_stack.setCurrentWidget(page)
+
+    def show_confirm_page(self, page):
+        if hasattr(page, "on_hide"):
+            page.on_hide()
+
+        if self.global_stack.indexOf(page) == -1:
+            self.global_stack.addWidget(page)
+
+        self.global_stack.setCurrentWidget(page)
+
+    def open_person_from_top(self):
+        if self.global_stack.indexOf(self.my) == -1:
+            self.global_stack.addWidget(self.my)
+
+        self.global_stack.setCurrentWidget(self.my)
+
+    def back_from_my(self):
+        # 回到主页
+        self.global_stack.setCurrentWidget(self.home_page)
+    def back_my(self):
+        # 回到主页
+        self.global_stack.setCurrentWidget(self.my)
+    def back_from_personcord(self):
+        # 回到主页
+        self.global_stack.setCurrentWidget(self.personcord)
+    def bind_confirm_page_signal(self, page):
+        if hasattr(page, "on_hide"):
+            page.on_hide()
+
+        if self.global_stack.indexOf(page) == -1:
+            self.global_stack.addWidget(page)
+
+        # ⭐ 返回
+        page.signal.connect(
+            lambda: self.global_stack.setCurrentWidget(self.home_page)
         )
+
+        page.b_signal.connect(
+            lambda: self.global_stack.setCurrentWidget(self.home_page)
+        )
+
+        self.global_stack.setCurrentWidget(page)
+    def bind_add_page_signal(self, page):
+        if self.global_stack.indexOf(page) == -1:
+            self.global_stack.addWidget(page)
+
+        # ⭐ 关键：绑定返回
+        if not hasattr(page, "_binded"):
+            page.q_signal.connect(
+                lambda: self.global_stack.setCurrentWidget(self.home_page)
+            )
+            page._binded = True
+
+        self.global_stack.setCurrentWidget(page)
+
+    def on_setting_clicked(self):
+
+        Toast("等等吧", self)
+    def nav(self, target_btn, target_page):
+        for btn in [self.ui.chat, self.ui.chatButton, self.ui.phone, self.ui.my]:
+            btn.setChecked(False)
+            btn.setIcon(QIcon(btn._icon_normal))
+
+        # 当前按钮选中
+        target_btn.setChecked(True)
+        target_btn.setIcon(QIcon(target_btn._icon_active))
+
+        # 切页面
+        self.home_stack.setCurrentWidget(target_page)
 
     def on_add_friend_success(self):
         self.refresh_chat_list()
-        self.stack.setCurrentWidget(self.page_list)
+        self.nav(self.ui.chat, self.ui.mainPage)
+        self.global_stack.setCurrentWidget(self.home_page)
 
     def init_nav_button(self, btn, icon_normal, icon_active, text, state):
         btn._icon_normal = icon_normal
         btn._icon_active = icon_active
 
         btn.setText(text)
-
         btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+
+        btn.setCheckable(True)  # ⭐关键1
+        btn.installEventFilter(self)  # ⭐关键2（所有按钮）
+
         if state:
+            btn.setChecked(True)  # ⭐关键3
             btn.setIcon(QIcon(icon_active))
-            btn.setIconSize(QSize(20, 20))
         else:
+            btn.setChecked(False)
             btn.setIcon(QIcon(icon_normal))
-            btn.setIconSize(QSize(20, 20))
-            btn.installEventFilter(self)
 
     def eventFilter(self, obj, event):
 
@@ -231,20 +349,19 @@ class Widget(QWidget):
         self.current_user = username
 
         self.load_chat_data(self.current_user)
-        self.fr.set_user(self.current_user)
+        self.contact.set_user(self.current_user)
 
-        self.stack.setCurrentWidget(self.page_list)
+        record = self.my.load_user(self.current_user)
+        self.personcord.get_user(record)
 
         if not self.page_chat:
             self.page_chat = ChatPage()
-            self.stack.addWidget(self.page_chat)
+            self.global_stack.addWidget(self.page_chat)
 
             self.page_chat.bind_back(
                 lambda: self.back_to_list_and_refresh()
             )
-            self.page_chat.bind_open_chara(
-                lambda: self.open_chara_page()
-            )
+
         QTimer.singleShot(100, self.start_intro_anim)
 
     def open_chara_page(self):
@@ -253,13 +370,20 @@ class Widget(QWidget):
 
         self.page_chara.set_chara_info(name, avatar)
 
-        self.stack.setCurrentWidget(self.page_chara)
+        if self.global_stack.indexOf(self.page_chara) == -1:
+            self.global_stack.addWidget(self.page_chara)
+
+        self.global_stack.setCurrentWidget(self.page_chara)
+
     def back_to_list_and_refresh(self):
-        self.refresh_chat_list()  # ⭐重新读数据库
-        self.stack.setCurrentWidget(self.page_list)
+        self.refresh_chat_list()  # 先刷新列表
+        self.nav(self.ui.chat, self.ui.mainPage)  # 主页内部回到聊天列表 tab
+        self.global_stack.setCurrentWidget(self.home_page)  # 全局层回到主页
+
     def back_to_fr(self):
-        self.fr.load_data(self.current_user)
-        self.stack.setCurrentWidget(self.fr)
+        self.contact.load_data()
+        self.home_stack.setCurrentWidget(self.ui.contact)
+        self.global_stack.setCurrentWidget(self.home_page)
 
     # ===== 切换聊天页 =====
     def open_chat_in_place(self, item: QListWidgetItem):
@@ -269,20 +393,26 @@ class Widget(QWidget):
             return
 
         fid = w.fid
-
         name = w.name_label.text()
         prompt = get_prompt_by_id(fid)
         avatar = w.avatar
 
+        if not self.page_chat:
+            self.page_chat = ChatPage()
+            self.global_stack.addWidget(self.page_chat)
+            self.page_chat.bind_back(
+                lambda: self.back_to_list_and_refresh()
+            )
+
         self.page_chat.set_chat(
-            self.current_user,  # ⭐传进去
+            self.current_user,
             fid,
             name,
             prompt,
             avatar
         )
 
-        self.stack.setCurrentWidget(self.page_chat)
+        self.global_stack.setCurrentWidget(self.page_chat)
 
     def render_static(self):
         for fid, name, msg, time_text, avatar_path, prompt in self._chat_data:
@@ -303,7 +433,7 @@ class Widget(QWidget):
                 item["id"],
                 item["name"],
                 item["last_message"] or "",
-                item["last_time"] or "",
+                self.format_list_time(item["last_time"]) or "",
                 item["avatar"] or "",
                 item["prompt"] or ""  # ⭐加这个
             )
@@ -329,24 +459,23 @@ class Widget(QWidget):
         else:
             self.render_static()  # ✅ 否则直接渲染
 
+    def format_list_time(self, time_str):
+        if not time_str:
+            return ""
+
+        dt = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+
+        if dt.date() == now.date():
+            return dt.strftime("%H:%M")
+        elif dt.date() == now.date() - timedelta(days=1):
+            return "昨天"
+        elif dt.year == now.year:
+            return dt.strftime("%m-%d")
+        else:
+            return dt.strftime("%Y-%m-%d")
 
     def bind_open_info(self, callback):
         tool_button = self.root.findChild(QToolButton, "menu")
         if tool_button:
             tool_button.clicked.connect(callback)
-
-if __name__ == "__main__":
-
-    app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(":/new/prefix1/azur.ico"))
-    # ===== 加载图 =====
-    splash_pix = QPixmap("logo.png")  # 你的加载图
-    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
-    splash.show()
-    app.processEvents()  # 刷新界面
-    # ===== 模拟加载时间 =====
-    QTimer.singleShot(1500, splash.close)  # 1.5秒后关闭
-    # ===== 主窗口 =====
-    widget = Widget()
-    QTimer.singleShot(1500, widget.show)
-    sys.exit(app.exec())

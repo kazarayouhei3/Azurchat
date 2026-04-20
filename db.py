@@ -1,10 +1,9 @@
 import sqlite3
-
-from datetime import datetime
-import json
 from collections import defaultdict
+from datetime import datetime
 
 DB_PATH = "chat.db"
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -12,72 +11,156 @@ def init_db():
 
     # ===== users =====
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
-        api TEXT,
-        url TEXT
-    )
-    """)
+                   CREATE TABLE IF NOT EXISTS users
+                   (
+                       id
+                       INTEGER
+                       PRIMARY
+                       KEY
+                       AUTOINCREMENT,
+
+                       -- 登录
+                       username
+                       TEXT
+                       UNIQUE,
+                       password
+                       TEXT,
+
+                       -- 指挥官资料
+                       nickname
+                       TEXT,
+                       avatar
+                       TEXT,
+                       birthday
+                       TEXT,
+                       region
+                       TEXT,
+                       signature
+                       TEXT,
+
+                       -- 成长
+                       level
+                       INTEGER
+                       DEFAULT
+                       1,
+                       exp
+                       INTEGER
+                       DEFAULT
+                       0,
+
+                       -- AI配置
+                       url
+                       TEXT,
+                       api
+                       TEXT,
+                       
+                       -- 系统
+                       created_at
+                       TEXT,
+                       updated_at
+                       TEXT,
+                       last_login
+                       TEXT
+                   )
+                   """)
 
     # ===== friends（好友表）=====
     cursor.execute("""
-    CREATE TABLE  IF NOT EXISTS friends (
-    id TEXT,
-    username TEXT,
-    friend_name TEXT,   -- 原始名字（角色名）
-    nickname TEXT,      -- ⭐ 用户自定义昵称
-    avatar TEXT,
-    PRIMARY KEY (username, id)
-)
-    """)
+                   CREATE TABLE IF NOT EXISTS friends
+                   (
+                       id
+                       TEXT,
+                       username
+                       TEXT,
+                       friend_name
+                       TEXT, -- 原始名字（角色名）
+                       nickname
+                       TEXT, -- ⭐ 用户自定义昵称
+                       avatar
+                       TEXT,
+                       PRIMARY
+                       KEY
+                   (
+                       username,
+                       id
+                   )
+                       )
+                   """)
 
     # ===== conversations（聊天列表）=====
     cursor.execute("""
-    CREATE TABLE  IF NOT EXISTS  conversations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    friend_id TEXT,
-    friend_name TEXT,   -- 原始名字
-    nickname TEXT,      -- ⭐ 昵称
-    avatar TEXT,
-    last_message TEXT,
-    last_time DATETIME
+                   CREATE TABLE IF NOT EXISTS conversations
+                   (
+                       id
+                       INTEGER
+                       PRIMARY
+                       KEY
+                       AUTOINCREMENT,
+                       username
+                       TEXT,
+                       friend_id
+                       TEXT,
+                       friend_name
+                       TEXT, -- 原始名字
+                       nickname
+                       TEXT, -- ⭐ 昵称
+                       avatar
+                       TEXT,
+                       last_message
+                       TEXT,
+                       last_time
+                       DATETIME
                    )
                    """)
     # ⭐ 防止重复会话（非常关键）
     cursor.execute("""
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friend
-    ON conversations(username, friend_name)
-    """)
+                   CREATE UNIQUE INDEX IF NOT EXISTS idx_user_friend
+                       ON conversations(username, friend_name)
+                   """)
 
     # ===== messages（聊天记录🔥）=====
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        conv_id INTEGER NOT NULL,
-        sender TEXT NOT NULL,          -- user / ai
-        content TEXT NOT NULL,
-        time DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+                   CREATE TABLE IF NOT EXISTS messages
+                   (
+                       id
+                       INTEGER
+                       PRIMARY
+                       KEY
+                       AUTOINCREMENT,
+                       conv_id
+                       INTEGER
+                       NOT
+                       NULL,
+                       sender
+                       TEXT
+                       NOT
+                       NULL, -- user / ai
+                       content
+                       TEXT
+                       NOT
+                       NULL,
+                       time
+                       DATETIME
+                       DEFAULT
+                       CURRENT_TIMESTAMP
+                   )
+                   """)
 
     # ===== 索引优化（性能关键🔥）=====
     cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_conv_id 
-    ON messages(conv_id)
-    """)
+                   CREATE INDEX IF NOT EXISTS idx_conv_id
+                       ON messages(conv_id)
+                   """)
 
     cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_msg_time
-    ON messages(time)
-    """)
+                   CREATE INDEX IF NOT EXISTS idx_msg_time
+                       ON messages(time)
+                   """)
 
     cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_username
-    ON conversations(username)
-    """)
+                   CREATE INDEX IF NOT EXISTS idx_username
+                       ON conversations(username)
+                   """)
 
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS all_friends
@@ -99,8 +182,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def get_conn():
     return sqlite3.connect(DB_PATH)
+
 
 def check_user(username, password):
     conn = get_conn()
@@ -122,6 +207,7 @@ def check_user(username, password):
     else:
         return "wrong_password"
 
+
 def check_api(username):
     conn = get_conn()
     cursor = conn.cursor()
@@ -141,10 +227,14 @@ def check_api(username):
 
     return bool(api and url)
 
+
 def register_user(username, password):
+    from datetime import datetime
+
     conn = get_conn()
     cursor = conn.cursor()
 
+    # 检查是否存在
     cursor.execute(
         "SELECT id FROM users WHERE username=?",
         (username,)
@@ -153,15 +243,47 @@ def register_user(username, password):
         conn.close()
         return "exist"
 
-    cursor.execute(
-        "INSERT INTO users (username, password) VALUES (?, ?)",
-        (username, password)
-    )
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 插入完整默认数据
+    cursor.execute("""
+        INSERT INTO users (
+            username, password,
+            nickname, avatar, birthday, region, signature,
+            level, exp,
+            api, url, 
+            created_at, updated_at, last_login
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        username,
+        password,
+
+        # ===== 默认资料 =====
+        username,              # nickname
+        ":/icon/head.jpg",     # avatar
+        "2000-01-01",
+        "",
+        "",
+
+        # ===== 成长 =====
+        1,
+        0,
+
+        # ===== AI =====
+        "",
+        "",
+
+        # ===== 时间 =====
+        now,
+        now,
+        now
+    ))
 
     conn.commit()
     conn.close()
 
     return "created"
+
 
 def update_user_api(username, api, url):
     conn = get_conn()
@@ -189,30 +311,31 @@ def get_user_api(username):
 
     if result:
         return result[0], result[1]
+
     return None, None
+
 
 def get_conversations_with_avatar(username):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT 
-        c.friend_id,
-        c.friend_name,
-        c.nickname,
-        c.last_message,
-        c.last_time,
-        f.avatar,
-        a.prompt   -- ⭐新增
-    FROM conversations c
-    LEFT JOIN friends f
-      ON c.friend_id = f.id
-     AND c.username = f.username
-    LEFT JOIN all_friends a
-      ON c.friend_id = a.id   -- ⭐用id关联（关键）
-    WHERE c.username = ?
-    ORDER BY c.last_time DESC
-    """, (username,))
+                   SELECT c.friend_id,
+                          c.friend_name,
+                          c.nickname,
+                          c.last_message,
+                          c.last_time,
+                          f.avatar,
+                          a.prompt -- ⭐新增
+                   FROM conversations c
+                            LEFT JOIN friends f
+                                      ON c.friend_id = f.id
+                                          AND c.username = f.username
+                            LEFT JOIN all_friends a
+                                      ON c.friend_id = a.id -- ⭐用id关联（关键）
+                   WHERE c.username = ?
+                   ORDER BY c.last_time DESC
+                   """, (username,))
 
     data = cursor.fetchall()
     conn.close()
@@ -228,53 +351,60 @@ def get_conversations_with_avatar(username):
             "last_message": last_msg,
             "last_time": last_time,
             "avatar": avatar,
-            "prompt": prompt or ""   # ⭐新增
+            "prompt": prompt or ""  # ⭐新增
         })
 
     return result
+
 
 def get_messages_by_fid(fid):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT sender, content, time
-    FROM messages
-    WHERE conv_id = ?
-    ORDER BY time ASC
-    """, (fid,))
+                   SELECT sender, content, time
+                   FROM messages
+                   WHERE conv_id = ?
+                   ORDER BY time ASC
+                   """, (fid,))
 
     data = cursor.fetchall()
     conn.close()
     return data
+
 
 def get_prompt_by_id(friend_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT prompt FROM all_friends
-    WHERE id = ?
-    """, (friend_id,))
+                   SELECT prompt
+                   FROM all_friends
+                   WHERE id = ?
+                   """, (friend_id,))
 
     result = cursor.fetchone()
     conn.close()
 
     return result[0] if result else ""
 
+
 def get_conv_id(username, friend_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT id FROM conversations
-    WHERE username = ? AND friend_id = ?
-    """, (username, friend_id))
+                   SELECT id
+                   FROM conversations
+                   WHERE username = ?
+                     AND friend_id = ?
+                   """, (username, friend_id))
 
     result = cursor.fetchone()
     conn.close()
 
     return result[0] if result else None
+
 
 def insert_message(conv_id, sender, content):
     conn = sqlite3.connect(DB_PATH)
@@ -283,12 +413,13 @@ def insert_message(conv_id, sender, content):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute("""
-    INSERT INTO messages (conv_id, sender, content, time)
-    VALUES (?, ?, ?, ?)
-    """, (conv_id, sender, content, now))
+                   INSERT INTO messages (conv_id, sender, content, time)
+                   VALUES (?, ?, ?, ?)
+                   """, (conv_id, sender, content, now))
 
     conn.commit()
     conn.close()
+
 
 def update_conversation(username, friend_name, msg):
     conn = sqlite3.connect(DB_PATH)
@@ -297,13 +428,17 @@ def update_conversation(username, friend_name, msg):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute("""
-    UPDATE conversations
-    SET last_message = ?, last_time = ?, is_deleted = 0
-    WHERE username = ? AND friend_name = ?
-    """, (msg, now, username, friend_name))
+                   UPDATE conversations
+                   SET last_message = ?,
+                       last_time    = ?,
+                       is_deleted   = 0
+                   WHERE username = ?
+                     AND friend_name = ?
+                   """, (msg, now, username, friend_name))
 
     conn.commit()
     conn.close()
+
 
 def load_all_friends_from_json(json_path="prompt/info.json"):
     import os, json, sqlite3
@@ -324,21 +459,21 @@ def load_all_friends_from_json(json_path="prompt/info.json"):
         json_ids.add(friend_id)
 
         cursor.execute("""
-        INSERT INTO all_friends 
-        (id, friend_name, faction, avatar, prompt)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-            friend_name=excluded.friend_name,
-            faction=excluded.faction,
-            avatar=excluded.avatar,
-            prompt=excluded.prompt
-        """, (
-            friend_id,
-            item["friend_name"],
-            item.get("faction", ""),
-            item.get("avatar", ""),
-            item.get("prompt", "")
-        ))
+                       INSERT INTO all_friends
+                           (id, friend_name, faction, avatar, prompt)
+                       VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO
+                       UPDATE SET
+                           friend_name=excluded.friend_name,
+                           faction=excluded.faction,
+                           avatar=excluded.avatar,
+                           prompt=excluded.prompt
+                       """, (
+                           friend_id,
+                           item["friend_name"],
+                           item.get("faction", ""),
+                           item.get("avatar", ""),
+                           item.get("prompt", "")
+                       ))
 
     # 删除多余数据
     cursor.execute("SELECT id FROM all_friends")
@@ -349,6 +484,8 @@ def load_all_friends_from_json(json_path="prompt/info.json"):
 
     conn.commit()
     conn.close()
+
+
 def get_groups(db_path="chat.db"):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -380,15 +517,16 @@ def get_groups(db_path="chat.db"):
 
     return result
 
+
 def get_friends_list(username):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT friend_name, nickname, avatar, id
-    FROM friends
-    WHERE username = ?
-    """, (username,))
+                   SELECT friend_name, nickname, avatar, id
+                   FROM friends
+                   WHERE username = ?
+                   """, (username,))
 
     data = cursor.fetchall()
     conn.close()
@@ -401,20 +539,23 @@ def get_friends_list(username):
 
         result.append({
             "id": fid,
-            "name": display_name,   # ⭐UI显示用这个
+            "name": display_name,  # ⭐UI显示用这个
             "avatar": avatar
         })
 
     return result
+
 
 def is_friend(username, friend_id):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT 1 FROM friends
-        WHERE username=? AND id=?
-    """, (username, friend_id))
+                   SELECT 1
+                   FROM friends
+                   WHERE username = ?
+                     AND id = ?
+                   """, (username, friend_id))
 
     result = cursor.fetchone()
     conn.close()
@@ -422,27 +563,30 @@ def is_friend(username, friend_id):
     return result is not None
 
 
-def add_friend(username, friend_id, friend_name, nickname, avatar=None):
+def addFriend(username, friend_id, friend_name, nickname, avatar=None):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT 1 FROM friends
-        WHERE username=? AND id=?
-    """, (username, friend_id))
+                   SELECT 1
+                   FROM friends
+                   WHERE username = ?
+                     AND id = ?
+                   """, (username, friend_id))
 
     if cursor.fetchone():
         conn.close()
         return False
 
     cursor.execute("""
-        INSERT INTO friends (id, username, friend_name, nickname, avatar)
-        VALUES (?, ?, ?, ?, ?)
-    """, (friend_id, username, friend_name, nickname, avatar))
+                   INSERT INTO friends (id, username, friend_name, nickname, avatar)
+                   VALUES (?, ?, ?, ?, ?)
+                   """, (friend_id, username, friend_name, nickname, avatar))
 
     conn.commit()
     conn.close()
     return True
+
 
 def update_conversation_last(username, friend_id, last_message):
     conn = sqlite3.connect(DB_PATH)
@@ -451,34 +595,87 @@ def update_conversation_last(username, friend_id, last_message):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute("""
-    UPDATE conversations
-    SET last_message = ?, last_time = ?
-    WHERE username = ? AND friend_id = ?
-    """, (last_message, now, username, friend_id))
+                   UPDATE conversations
+                   SET last_message = ?,
+                       last_time    = ?
+                   WHERE username = ?
+                     AND friend_id = ?
+                   """, (last_message, now, username, friend_id))
 
     conn.commit()
     conn.close()
+
 
 def add_conversation(username, friend_id, friend_name, nickname, avatar=None):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT 1 FROM conversations
-        WHERE username=? AND friend_id=?
-    """, (username, friend_id))
+                   SELECT 1
+                   FROM conversations
+                   WHERE username = ?
+                     AND friend_id = ?
+                   """, (username, friend_id))
 
     if cursor.fetchone():
         conn.close()
         return False
 
     cursor.execute("""
-        INSERT INTO conversations (
-            username, friend_id, friend_name, nickname, avatar, last_message, last_time
-        )
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    """, (username, friend_id, friend_name, nickname, avatar, ""))
+                   INSERT INTO conversations (username, friend_id, friend_name, nickname, avatar, last_message,
+                                              last_time)
+                   VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                   """, (username, friend_id, friend_name, nickname, avatar, ""))
 
     conn.commit()
     conn.close()
     return True
+
+def get_user_profile(username):
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            nickname,
+            avatar,
+            level,
+            exp,
+            signature,
+            region,
+            birthday
+        FROM users
+        WHERE username=?
+    """, (username,))
+
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        return None
+
+    nickname, avatar, level, exp, signature, region, birthday = result
+
+    return {
+        "nickname": nickname,
+        "avatar": avatar,
+
+        "level": level,
+        "exp": exp,
+
+        "signature": signature,
+        "region": region,
+        "birthday": birthday
+    }
+
+def update_user_signature(username, signature):
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE users SET signature=? WHERE username=?",
+        (signature, username)
+    )
+
+    conn.commit()
+    conn.close()

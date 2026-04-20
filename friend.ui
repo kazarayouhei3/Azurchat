@@ -155,7 +155,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pic.qrc">
+            <iconset>
              <normaloff>:/new/prefix1/go.png</normaloff>:/new/prefix1/go.png</iconset>
            </property>
            <property name="iconSize">
@@ -496,8 +496,6 @@ border: 1px solid #E0E0E0;</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="pic.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

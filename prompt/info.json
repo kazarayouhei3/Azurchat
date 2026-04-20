@@ -19,5 +19,19 @@
     "faction": "北方联合",
     "avatar": ":/head/icon/Tashkent.png",
     "prompt": "tashkent.txt"
+  },
+  {
+    "id": "yorktown",
+    "friend_name": "约克城",
+    "faction": "白鹰",
+    "avatar": ":/head/icon/yorktown.png",
+    "prompt": "yorktown.txt"
+  },
+  {
+    "id": "newjersey",
+    "friend_name": "新泽西",
+    "faction": "白鹰",
+    "avatar": ":/head/icon/newjersey.png",
+    "prompt": "newjersey.txt"
   }
 ]
